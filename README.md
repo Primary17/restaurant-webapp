@@ -55,8 +55,8 @@ sudo docker exec -it restaurant_web python manage.py collectstatic --noinput
 ```
 
 ## 📂 Project Structure
-* `/app` - Django project root.
-* `/app/core` - Main application logic (Models, Views, Templates).
+* `/restaurant_site` - Django project root.
+* `/restaurant_site/core` - Main application logic (Models, Views, Templates).
 * `docker-compose.yml` - Docker services configuration.
 * `Dockerfile` - Python environment configuration.
 * `.env` - Local environment variables (do not commit!).
