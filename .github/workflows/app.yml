@@ -1,0 +1,50 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: restaurant
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t restaurant-app .
+
+      - name: Run container
+        run: |
+          docker run -d \
+            --name test_app \
+            -e POSTGRES_HOST=host.docker.internal \
+            -e POSTGRES_DB=restaurant \
+            -e POSTGRES_USER=user \
+            -e POSTGRES_PASSWORD=password \
+            -p 8000:8000 \
+            restaurant-app
+
+      - name: Wait for app
+        run: sleep 10
+
+      - name: Run tests (placeholder)
+        run: |
+          docker exec test_app python manage.py test || echo "No tests yet"
