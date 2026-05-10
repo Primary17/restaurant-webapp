@@ -15,3 +15,7 @@ class IngredientGroup(models.Model):
 
     def __str__(self):
         return f"{self.dish} - {self.name}"
+
+    def clean(self):
+        if self.max_choices < 1:
+            raise ValidationError("max_choices must be >= 1")

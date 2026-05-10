@@ -12,3 +12,6 @@ class AddonCategory(MPTTModel):
         blank=True,
         related_name='children'
     )
+
+    def __str__(self):
+        return self.name
