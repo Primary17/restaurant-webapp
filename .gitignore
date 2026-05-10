@@ -219,3 +219,6 @@ __marimo__/
 
 # Docker
 .docker/
+
+# Static files
+restaurant_site/staticfiles/

@@ -7,7 +7,8 @@ services:
             python manage.py migrate &&
             gunicorn restaurant_site.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - ./app:/app
+      - ./restaurant_site:/restaurant_site
+      - ./restaurant_site/media:/restaurant_site/media
     ports:
       - "8000:8000"
     env_file:
