@@ -1,0 +1,526 @@
+[
+{
+  "model": "menu.addoncategory",
+  "pk": 1,
+  "fields": {
+    "name": "Делікатеси",
+    "parent": null,
+    "lft": 1,
+    "rght": 2,
+    "tree_id": 1,
+    "level": 0
+  }
+},
+{
+  "model": "menu.addoncategory",
+  "pk": 2,
+  "fields": {
+    "name": "Спеції та масла",
+    "parent": null,
+    "lft": 1,
+    "rght": 2,
+    "tree_id": 2,
+    "level": 0
+  }
+},
+{
+  "model": "menu.addoncategory",
+  "pk": 3,
+  "fields": {
+    "name": "Гарніри",
+    "parent": null,
+    "lft": 1,
+    "rght": 4,
+    "tree_id": 3,
+    "level": 0
+  }
+},
+{
+  "model": "menu.addoncategory",
+  "pk": 4,
+  "fields": {
+    "name": "Випічка",
+    "parent": 3,
+    "lft": 2,
+    "rght": 3,
+    "tree_id": 3,
+    "level": 1
+  }
+},
+{
+  "model": "menu.addoncategory",
+  "pk": 5,
+  "fields": {
+    "name": "Додатки до напоїв",
+    "parent": null,
+    "lft": 1,
+    "rght": 6,
+    "tree_id": 4,
+    "level": 0
+  }
+},
+{
+  "model": "menu.addoncategory",
+  "pk": 6,
+  "fields": {
+    "name": "Прянощі",
+    "parent": 5,
+    "lft": 2,
+    "rght": 3,
+    "tree_id": 4,
+    "level": 1
+  }
+},
+{
+  "model": "menu.addoncategory",
+  "pk": 7,
+  "fields": {
+    "name": "Сиропи",
+    "parent": 5,
+    "lft": 4,
+    "rght": 5,
+    "tree_id": 4,
+    "level": 1
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 1,
+  "fields": {
+    "name": "Фуа-гра",
+    "image": "addons/foie_gras.jpg",
+    "category": 1,
+    "price": "320.00"
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 2,
+  "fields": {
+    "name": "Чорний трюфель",
+    "image": "addons/black_truffle.jpg",
+    "category": 1,
+    "price": "250.00"
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 3,
+  "fields": {
+    "name": "Масло з травами",
+    "image": "addons/herbal_butter.jpg",
+    "category": 2,
+    "price": "45.00"
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 4,
+  "fields": {
+    "name": "Перепелине яйце пашот",
+    "image": "addons/poached_quails_egg.jpg",
+    "category": 1,
+    "price": "40.00"
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 5,
+  "fields": {
+    "name": "Грінки з бріоша",
+    "image": "addons/brioche_croutons_DS5OQkS.jpg",
+    "category": 4,
+    "price": "35.00"
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 6,
+  "fields": {
+    "name": "Лід",
+    "image": "addons/ice.jpg",
+    "category": 5,
+    "price": "0.00"
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 7,
+  "fields": {
+    "name": "М'ята",
+    "image": "addons/mint.jpg",
+    "category": 6,
+    "price": "5.00"
+  }
+},
+{
+  "model": "menu.addon",
+  "pk": 8,
+  "fields": {
+    "name": "Гренадін",
+    "image": "addons/grenadine_syrop.jpg",
+    "category": 7,
+    "price": "10.00"
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 1,
+  "fields": {
+    "name": "Закуски",
+    "parent": null,
+    "lft": 1,
+    "rght": 6,
+    "tree_id": 1,
+    "level": 0
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 2,
+  "fields": {
+    "name": "Холодні закуски",
+    "parent": 1,
+    "lft": 2,
+    "rght": 5,
+    "tree_id": 1,
+    "level": 1
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 3,
+  "fields": {
+    "name": "Риба й морепродукти",
+    "parent": 2,
+    "lft": 3,
+    "rght": 4,
+    "tree_id": 1,
+    "level": 2
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 4,
+  "fields": {
+    "name": "Основні страви",
+    "parent": null,
+    "lft": 1,
+    "rght": 6,
+    "tree_id": 3,
+    "level": 0
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 5,
+  "fields": {
+    "name": "М'ясні",
+    "parent": 4,
+    "lft": 2,
+    "rght": 5,
+    "tree_id": 3,
+    "level": 1
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 6,
+  "fields": {
+    "name": "Стейки",
+    "parent": 5,
+    "lft": 3,
+    "rght": 4,
+    "tree_id": 3,
+    "level": 2
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 7,
+  "fields": {
+    "name": "Напої",
+    "parent": null,
+    "lft": 1,
+    "rght": 6,
+    "tree_id": 2,
+    "level": 0
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 8,
+  "fields": {
+    "name": "Безалкогольні",
+    "parent": 7,
+    "lft": 2,
+    "rght": 5,
+    "tree_id": 2,
+    "level": 1
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 9,
+  "fields": {
+    "name": "Лимонади",
+    "parent": 8,
+    "lft": 3,
+    "rght": 4,
+    "tree_id": 2,
+    "level": 2
+  }
+},
+{
+  "model": "menu.dishaddongroup",
+  "pk": 1,
+  "fields": {
+    "dish": 1,
+    "category": 2,
+    "is_required": false,
+    "max_choices": 1
+  }
+},
+{
+  "model": "menu.dishaddongroup",
+  "pk": 2,
+  "fields": {
+    "dish": 1,
+    "category": 1,
+    "is_required": false,
+    "max_choices": 2
+  }
+},
+{
+  "model": "menu.dishaddongroup",
+  "pk": 3,
+  "fields": {
+    "dish": 2,
+    "category": 4,
+    "is_required": false,
+    "max_choices": 1
+  }
+},
+{
+  "model": "menu.dishaddongroup",
+  "pk": 4,
+  "fields": {
+    "dish": 3,
+    "category": 5,
+    "is_required": false,
+    "max_choices": 3
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 1,
+  "fields": {
+    "name": "Філе міньйон з абердин-ангуса",
+    "category": 6,
+    "base_price": "850.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 2,
+  "fields": {
+    "name": "Тартар із блакитного тунця",
+    "category": 3,
+    "base_price": "420.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 3,
+  "fields": {
+    "name": "Цитрусовий лимонад",
+    "category": 9,
+    "base_price": "65.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.dishimage",
+  "pk": 1,
+  "fields": {
+    "dish": 1,
+    "image": "dishes/black_angus_filet_mignon.jpg",
+    "is_main": true
+  }
+},
+{
+  "model": "menu.dishimage",
+  "pk": 2,
+  "fields": {
+    "dish": 2,
+    "image": "dishes/bluefin_tartar.jpg",
+    "is_main": true
+  }
+},
+{
+  "model": "menu.dishimage",
+  "pk": 3,
+  "fields": {
+    "dish": 3,
+    "image": "dishes/citrus_lemonade1.jpg",
+    "is_main": true
+  }
+},
+{
+  "model": "menu.dishimage",
+  "pk": 4,
+  "fields": {
+    "dish": 3,
+    "image": "dishes/citrus_lemonade2.jpg",
+    "is_main": false
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 1,
+  "fields": {
+    "dish": 1,
+    "name": "Степінь прожарки",
+    "is_required": true,
+    "max_choices": 1
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 2,
+  "fields": {
+    "dish": 2,
+    "name": "Маринади",
+    "is_required": true,
+    "max_choices": 1
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 1,
+  "fields": {
+    "group": 1,
+    "ingredient": 1,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 2,
+  "fields": {
+    "group": 1,
+    "ingredient": 2,
+    "price_delta": "0.00",
+    "is_default": false
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 3,
+  "fields": {
+    "group": 1,
+    "ingredient": 3,
+    "price_delta": "0.00",
+    "is_default": false
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 4,
+  "fields": {
+    "group": 1,
+    "ingredient": 4,
+    "price_delta": "0.00",
+    "is_default": false
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 5,
+  "fields": {
+    "group": 1,
+    "ingredient": 5,
+    "price_delta": "0.00",
+    "is_default": false
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 6,
+  "fields": {
+    "group": 2,
+    "ingredient": 6,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 7,
+  "fields": {
+    "group": 2,
+    "ingredient": 7,
+    "price_delta": "0.00",
+    "is_default": false
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 1,
+  "fields": {
+    "name": "Rare",
+    "image": "ingredients/rare.png"
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 2,
+  "fields": {
+    "name": "Medium Rare",
+    "image": "ingredients/medium_rare.png"
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 3,
+  "fields": {
+    "name": "Medium",
+    "image": "ingredients/medium.png"
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 4,
+  "fields": {
+    "name": "Medium Well",
+    "image": "ingredients/medium_well.png"
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 5,
+  "fields": {
+    "name": "Well Done",
+    "image": "ingredients/well_done.png"
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 6,
+  "fields": {
+    "name": "Класичний маринад",
+    "image": ""
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 7,
+  "fields": {
+    "name": "Гострий азійський маринад",
+    "image": ""
+  }
+}
+]
