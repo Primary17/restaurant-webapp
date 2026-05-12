@@ -28,6 +28,8 @@ SECRET_KEY = 'django-insecure-y_j(u7o=d6r0jc(5q^y-#c^+k-wt)*@ni=5(*)733!3bd22avc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+CORS_ALLOW_ALL_ORIGINS = True  # Also dev only
+
 ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.User'
@@ -46,6 +48,8 @@ INSTALLED_APPS = [
     'mptt',
     'nested_admin',
     'rest_framework',
+    'corsheaders',
+    'drf_spectacular',
     'menu',
     'users',
 ]
@@ -60,6 +64,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'restaurant_site.urls'
@@ -87,6 +92,7 @@ WSGI_APPLICATION = 'restaurant_site.wsgi.application'
 from datetime import timedelta
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
