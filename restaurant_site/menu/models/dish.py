@@ -9,6 +9,11 @@ class Dish(models.Model):
 
     is_active = models.BooleanField(default=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['category', 'is_active'], name='dish_category_active_idx'),
+        ]
+
     def __str__(self):
         return self.name
 

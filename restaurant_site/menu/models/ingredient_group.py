@@ -1,5 +1,5 @@
+from django.core.exceptions import ValidationError
 from django.db import models
-from mptt.models import MPTTModel, TreeForeignKey
 
 
 class IngredientGroup(models.Model):

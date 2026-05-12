@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -41,10 +42,10 @@ class OrderDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        order = Order.objects.get(pk=pk)
+        order = get_object_or_404(Order, pk=pk)
 
         if order.user != request.user and request.user.role not in ['staff', 'admin']:
-            return Response(status=403)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         return Response(OrderSerializer(order).data)
 
@@ -53,12 +54,25 @@ class UpdateStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, pk):
-        order = Order.objects.get(pk=pk)
+        order = get_object_or_404(Order, pk=pk)
 
         if request.user.role not in ['staff', 'admin']:
-            return Response(status=403)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        order.status = request.data.get('status', order.status)
-        order.save()
+        new_status = request.data.get('status')
+        if new_status is None:
+            return Response(
+                {"detail": "Поле status обов'язкове."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        valid = {c[0] for c in Order.STATUS_CHOICES}
+        if new_status not in valid:
+            return Response(
+                {"detail": "Недопустимий статус.", "allowed": sorted(valid)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        order.status = new_status
+        order.save(update_fields=['status', 'updated_at'])
 
         return Response({"status": order.status})

@@ -8,6 +8,9 @@ def checkout_cart(user, data):
         'items__ingredients'
     ).get(user=user)
 
+    if not cart.items.exists():
+        raise ValueError('Кошик порожній.')
+
     items_data = []
 
     for item in cart.items.all():
