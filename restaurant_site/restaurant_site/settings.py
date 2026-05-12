@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'menu',
     'users',
+    'orders',
 ]
 
 MIDDLEWARE = [
