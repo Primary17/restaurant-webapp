@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'menu',
     'users',
     'orders',
+    'frontend',
 ]
 
 MIDDLEWARE = [
