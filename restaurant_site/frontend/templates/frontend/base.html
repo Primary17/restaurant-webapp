@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Ресторан{% endblock %}</title>
+  <link href="{% static 'frontend/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontend/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'frontend/vendor/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'frontend/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontend/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'frontend/css/main.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<header id="header" class="header d-flex align-items-center sticky-top">
+  <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+    <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+      <h1 class="sitename">Ресторан</h1>
+    </a>
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="{% url 'index' %}">Головна</a></li>
+        <li><a href="{% url 'menu' %}">Меню</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+  </div>
+</header>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer id="footer" class="footer dark-background">
+  <div class="container">
+    <div class="copyright text-center">
+      <p>© 2024 Ресторан. Всі права захищені.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="{% static 'frontend/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'frontend/vendor/aos/aos.js' %}"></script>
+<script src="{% static 'frontend/vendor/glightbox/js/glightbox.min.js' %}"></script>
+<script src="{% static 'frontend/vendor/swiper/swiper-bundle.min.js' %}"></script>
+<script src="{% static 'frontend/js/main.js' %}"></script>
+</body>
+</html>

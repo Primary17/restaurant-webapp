@@ -1,0 +1,133 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}{{ dish.name }}{% endblock %}
+
+{% block content %}
+
+<div class="page-title dark-background" style="background-image: url({% static 'frontend/img/page-title-bg.webp' %});">
+  <div class="container position-relative">
+    <h1>{{ dish.name }}</h1>
+  </div>
+</div>
+
+<section class="menu section">
+  <div class="container">
+    <div class="row gy-4">
+
+      <div class="col-lg-5">
+        {% if dish.images.first %}
+        <img src="/media/{{ dish.images.first.image }}"
+           alt="{{ dish.name }}"
+           style="width:100%; height:450px; object-fit:cover; border-radius:16px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+            {% else %}
+        <img src="{% static 'frontend/img/menu/lobster-bisque.jpg' %}" class="img-fluid rounded" alt="{{ dish.name }}">
+        {% endif %}
+      </div>
+
+      <div class="col-lg-7">
+        <h2 style="color:#cda45e;">{{ dish.name }}</h2>
+        <p style="color:#aaa;">{{ dish.description }}</p>
+
+        <div class="mb-3">
+          <span style="color:#cda45e; font-size:1.5rem; font-weight:bold;" id="total-price">
+            {{ dish.base_price }} грн
+          </span>
+        </div>
+
+        {% if dish.ingredient_groups.all %}
+        <div class="mb-4">
+          {% for group in dish.ingredient_groups.all %}
+          <div class="mb-3">
+            <h6 style="color:#cda45e;">{{ group.name }}</h6>
+            <div class="d-flex flex-wrap gap-2 ingredient-group">
+                {% for option in group.options.all %}
+              <div class="ingredient-card p-2 rounded text-center"
+                 data-price="{{ option.price_delta }}"
+                 data-selected="{% if option.is_default %}true{% else %}false{% endif %}"
+                 onclick="toggleIngredient(this)"
+                 style="cursor:pointer; border:1px solid {% if option.is_default %}#cda45e{% else %}#333{% endif %};
+                        background:{% if option.is_default %}#2a2a1a{% else %}#1a1a1a{% endif %}; color:#fff; width:100px;">
+                {% if option.ingredient.image %}
+                  <img src="/media/{{ option.ingredient.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
+                  {% endif %}
+                  <div>{{ option.ingredient.name }}</div>
+                  {% if option.price_delta > 0 %}
+                  <small style="color:#cda45e;">+{{ option.price_delta }} грн</small>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if dish.addon_groups.all %}
+        <div class="mb-4">
+          <h5 style="color:#fff;">Додатки:</h5>
+          {% for group in dish.addon_groups.all %}
+          <div class="mb-3">
+            <h6 style="color:#cda45e;">{{ group.category.name }}</h6>
+            <div class="d-flex flex-wrap gap-2">
+              {% for addon in group.category.addon_set.all %}
+              <div class="addon-card p-2 rounded text-center"
+                 data-price="{{ addon.price }}"
+                 data-selected="false"
+                 onclick="toggleAddon(this)"
+                 style="cursor:pointer; border:1px solid #333; background:#1a1a1a; color:#fff; width:100px;">
+                {% if addon.image %}
+                <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
+                {% endif %}
+                <div>{{ addon.name }}</div>
+                <small style="color:#cda45e;">+{{ addon.price }} грн</small>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <a href="{% url 'menu' %}" class="btn" style="background:#cda45e; color:#000;">← Назад до меню</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+const basePrice = {{ dish.base_price }};
+
+function updatePrice() {
+  let total = basePrice;
+  document.querySelectorAll('.ingredient-card, .addon-card').forEach(card => {
+    if (card.dataset.selected === 'true') {
+      total += parseFloat(card.dataset.price || 0);
+    }
+  });
+  document.getElementById('total-price').textContent = total.toFixed(2) + ' грн';
+}
+
+function toggleIngredient(el) {
+  const group = el.closest('.ingredient-group');
+  group.querySelectorAll('.ingredient-card').forEach(card => {
+    card.dataset.selected = 'false';
+    card.style.border = '1px solid #333';
+    card.style.background = '#1a1a1a';
+  });
+  el.dataset.selected = 'true';
+  el.style.border = '1px solid #cda45e';
+  el.style.background = '#2a2a1a';
+  updatePrice();
+}
+
+function toggleAddon(el) {
+  el.dataset.selected = el.dataset.selected === 'true' ? 'false' : 'true';
+  el.style.border = el.dataset.selected === 'true' ? '1px solid #cda45e' : '1px solid #333';
+  el.style.background = el.dataset.selected === 'true' ? '#2a2a1a' : '#1a1a1a';
+  updatePrice();
+}
+</script>
+
+{% endblock %}
