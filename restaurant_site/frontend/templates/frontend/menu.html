@@ -2,105 +2,130 @@
 {% load static %}
 
 {% block title %}Меню{% endblock %}
+{% block nav_menu %}class="active"{% endblock %}
 
 {% block content %}
 
-<div class="page-title dark-background" style="background-image: url({% static 'frontend/img/page-title-bg.webp' %});">
-  <div class="container position-relative">
-    <h1>Меню</h1>
-  </div>
+<div class="page-title dark-background" style="background-image: url({% static 'frontend/img/page-title-bg.webp' %}); min-height:200px;">
 </div>
 
 <section id="menu" class="menu section">
   <div class="container section-title">
-    <h2>Наші страви</h2>
+    <h2>Меню</h2>
+    <p>Перегляньте наше смачне меню</p>
   </div>
+
   <div class="container">
 
-    <div class="row mb-4">
-      <div class="col-12">
-        <form method="GET" id="filter-form">
-
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <input type="text" name="search" class="form-control"
-                     placeholder="Пошук страви..." value="{{ search }}"
-                     style="background:#1a1a1a; color:#fff; border-color:#333;">
-            </div>
-
-            <div class="col-md-3">
-              <select name="ordering" class="form-select"
-                      style="background:#1a1a1a; color:#fff; border-color:#333;">
-                <option value="">Сортування</option>
-                <option value="base_price" {% if ordering == 'base_price' %}selected{% endif %}>Ціна ↑</option>
-                <option value="-base_price" {% if ordering == '-base_price' %}selected{% endif %}>Ціна ↓</option>
-                <option value="name" {% if ordering == 'name' %}selected{% endif %}>Назва А-Я</option>
-                <option value="-name" {% if ordering == '-name' %}selected{% endif %}>Назва Я-А</option>
-              </select>
-            </div>
-
-            <div class="col-md-2">
-              <button type="submit" class="btn w-100" style="background:#cda45e; color:#000;">Знайти</button>
-            </div>
-            <div class="col-md-2">
-              <a href="{% url 'menu' %}" class="btn w-100" style="border-color:#cda45e; color:#cda45e;">Скинути</a>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-12">
-              <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'menu' %}"
-                   class="btn btn-sm {% if not selected_category %}active{% endif %}"
-                   style="{% if not selected_category %}background:#cda45e; color:#000;{% else %}border-color:#cda45e; color:#cda45e;{% endif %}">
-                  Всі
-                </a>
-                {% for cat in categories %}
-                <a href="?category={{ cat.id }}"
-                   class="btn btn-sm"
-                   style="{% if selected_category == cat.id|stringformat:'s' %}background:#cda45e; color:#000;{% else %}border-color:#cda45e; color:#cda45e;{% endif %}">
-                  {{ cat.name }}
-                </a>
-                  {% for child in cat.get_children %}
-                  <a href="?category={{ child.id }}"
-                     class="btn btn-sm"
-                     style="{% if selected_category == child.id|stringformat:'s' %}background:#cda45e; color:#000;{% else %}border-color:#333; color:#aaa;{% endif %}">
-                    — {{ child.name }}
-                  </a>
+    <!-- Фільтри категорій з dropdown -->
+    <div class="row">
+      <div class="col-lg-12 d-flex justify-content-center">
+        <ul class="menu-filters isotope-filters" style="position:relative;">
+          <li class="{% if not selected_category %}filter-active{% endif %}"
+              onclick="filterCategory('')" style="cursor:pointer;">Всі</li>
+          {% for cat in categories %}
+          <li style="cursor:pointer; position:relative;"
+              class="{% if root_category_id == cat.id|stringformat:'s' or selected_category == cat.id|stringformat:'s' %}filter-active{% endif %} cat-parent">
+            <span onclick="filterCategory('{{ cat.id }}')">{{ cat.name }}</span>
+            {% if cat.get_children %}
+            <ul class="cat-dropdown" style="display:none; position:absolute; top:100%; left:0;
+                       background:#29261f; border:1px solid #cda45e; list-style:none;
+                       padding:8px 0; margin:0; min-width:200px; z-index:100; border-radius:4px;">
+              {% for child in cat.get_children %}
+              <li style="position:relative;" class="cat-child">
+                <div onclick="filterCategory('{{ child.id }}')"
+                     style="padding:8px 16px; cursor:pointer; color:#fff; white-space:nowrap;
+                            display:flex; justify-content:space-between; align-items:center;"
+                     onmouseover="this.style.color='#cda45e';"
+                     onmouseout="this.style.color='#fff';">
+                  {{ child.name }}
+                  {% if child.get_children %}
+                  <i class="bi bi-chevron-right" style="font-size:10px; margin-left:8px;"></i>
+                  {% endif %}
+                </div>
+                {% if child.get_children %}
+                <ul class="cat-dropdown-2" style="display:none; position:absolute;
+                           left:100%; top:0; background:#29261f; border:1px solid #cda45e;
+                           list-style:none; padding:8px 0; margin:0; min-width:180px;
+                           z-index:101; border-radius:4px;">
+                  {% for grandchild in child.get_children %}
+                  <li onclick="filterCategory('{{ grandchild.id }}')"
+                      style="padding:8px 16px; cursor:pointer; color:#fff; white-space:nowrap;"
+                      onmouseover="this.style.color='#cda45e';"
+                      onmouseout="this.style.color='#fff';">
+                    {{ grandchild.name }}
+                  </li>
                   {% endfor %}
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-
-        </form>
+                </ul>
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
       </div>
     </div>
 
-    <div class="row gy-4" id="dish-list">
+    <!-- Пошук і сортування -->
+    <div class="row mt-3 mb-2">
+      <div class="col-md-5">
+        <input type="text" id="search-input" class="form-control"
+               placeholder="Пошук страви..." value="{{ search }}"
+               style="background:#1a1a1a; color:#fff; border-color:#333;">
+      </div>
+      <div class="col-md-4">
+        <select id="ordering-select" class="form-select"
+                style="background:#1a1a1a; color:#fff; border-color:#333;">
+          <option value="">Сортування</option>
+          <option value="base_price" {% if ordering == 'base_price' %}selected{% endif %}>Ціна ↑</option>
+          <option value="-base_price" {% if ordering == '-base_price' %}selected{% endif %}>Ціна ↓</option>
+          <option value="name" {% if ordering == 'name' %}selected{% endif %}>Назва А-Я</option>
+          <option value="-name" {% if ordering == '-name' %}selected{% endif %}>Назва Я-А</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Range slider -->
+    <div class="row mt-2 mb-2">
+      <div class="col-md-6">
+        <label style="color:#cda45e; margin-bottom:5px;">
+          Ціна до: <span id="price-label">{{ price_max }}</span> грн
+        </label>
+        <input type="range" id="price-range" min="0" max="1000"
+               value="{{ price_max }}"
+               class="form-range" style="accent-color:#cda45e;">
+      </div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <button onclick="applyFilters()" class="btn me-2" style="background:#cda45e; color:#000; padding:8px 30px;">Знайти</button>
+        <a href="{% url 'menu' %}" class="btn" style="border:1px solid #cda45e; color:#cda45e; padding:8px 30px;">Скинути</a>
+      </div>
+    </div>
+
+    <!-- Список страв -->
+    <div class="row" id="dish-list">
       {% for dish in dishes %}
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100" style="background:#1a1a1a; border:1px solid #333;">
-          {% if dish.images.first %}
-            <img src="/media/{{ dish.images.first.image }}" class="card-img-top"
-               alt="{{ dish.name }}" style="height:200px; object-fit:cover;">
-          {% else %}
-          <img src="{% static 'frontend/img/menu/lobster-bisque.jpg' %}"
-               class="card-img-top" alt="{{ dish.name }}" style="height:200px; object-fit:cover;">
-          {% endif %}
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title" style="color:#cda45e;">{{ dish.name }}</h5>
-            <p class="card-text" style="color:#aaa;">{{ dish.description|truncatewords:15 }}</p>
-            <div class="mt-auto d-flex justify-content-between align-items-center">
-              <span style="color:#cda45e; font-weight:bold;">{{ dish.base_price }} грн</span>
-              <a href="{% url 'dish_detail' dish.id %}" class="btn btn-sm"
-                 style="background:#cda45e; color:#000;">Детальніше</a>
-            </div>
-          </div>
+      <div class="col-lg-6 menu-item">
+        {% if dish.images.first %}
+        <img src="/media/{{ dish.images.first.image }}" class="menu-img" alt="{{ dish.name }}">
+        {% else %}
+        <img src="{% static 'frontend/img/menu/lobster-bisque.jpg' %}" class="menu-img" alt="{{ dish.name }}">
+        {% endif %}
+        <div class="menu-content">
+          <a href="{% url 'dish_detail' dish.id %}">{{ dish.name }}</a>
+          <span>{{ dish.base_price }} грн</span>
+        </div>
+        <div class="menu-ingredients">
+          {{ dish.category.name }}
         </div>
       </div>
       {% empty %}
-      <div class="col-12 text-center" style="color:#aaa;">
+      <div class="col-12 text-center" style="color:#aaa; padding:40px;">
         <p>Страви не знайдено. Спробуйте інші фільтри.</p>
       </div>
       {% endfor %}
@@ -108,5 +133,64 @@
 
   </div>
 </section>
+
+<script>
+document.querySelectorAll('.cat-parent').forEach(function(item) {
+  item.addEventListener('mouseenter', function() {
+    const dropdown = this.querySelector('.cat-dropdown');
+    if (dropdown) dropdown.style.display = 'block';
+  });
+  item.addEventListener('mouseleave', function() {
+    const dropdown = this.querySelector('.cat-dropdown');
+    if (dropdown) dropdown.style.display = 'none';
+  });
+});
+
+document.querySelectorAll('.cat-child').forEach(function(item) {
+  item.addEventListener('mouseenter', function() {
+    const dropdown = this.querySelector('.cat-dropdown-2');
+    if (dropdown) dropdown.style.display = 'block';
+  });
+  item.addEventListener('mouseleave', function() {
+    const dropdown = this.querySelector('.cat-dropdown-2');
+    if (dropdown) dropdown.style.display = 'none';
+  });
+});
+
+function filterCategory(categoryId) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('search');
+  url.searchParams.delete('ordering');
+  url.searchParams.delete('price_max');
+  if (categoryId) {
+    url.searchParams.set('category', categoryId);
+  } else {
+    url.searchParams.delete('category');
+  }
+  window.location.href = url.toString();
+}
+
+function applyFilters() {
+  const url = new URL(window.location.href);
+  const search = document.getElementById('search-input').value;
+  const ordering = document.getElementById('ordering-select').value;
+  const priceMax = document.getElementById('price-range').value;
+
+  if (search) url.searchParams.set('search', search);
+  else url.searchParams.delete('search');
+
+  if (ordering) url.searchParams.set('ordering', ordering);
+  else url.searchParams.delete('ordering');
+
+  if (priceMax < 1000) url.searchParams.set('price_max', priceMax);
+  else url.searchParams.delete('price_max');
+
+  window.location.href = url.toString();
+}
+
+document.getElementById('price-range').addEventListener('input', function() {
+  document.getElementById('price-label').textContent = this.value;
+});
+</script>
 
 {% endblock %}
