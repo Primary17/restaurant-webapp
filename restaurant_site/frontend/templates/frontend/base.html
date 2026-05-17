@@ -5,6 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Ресторан{% endblock %}</title>
+  <link href="{% static 'frontend/img/favicon.png' %}" rel="icon">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="{% static 'frontend/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link href="{% static 'frontend/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
   <link href="{% static 'frontend/vendor/aos/aos.css' %}" rel="stylesheet">
@@ -12,38 +14,88 @@
   <link href="{% static 'frontend/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
   <link href="{% static 'frontend/css/main.css' %}" rel="stylesheet">
 </head>
-<body>
+<body class="index-page">
 
-<header id="header" class="header d-flex align-items-center sticky-top">
-  <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-    <a href="{% url 'index' %}" class="logo d-flex align-items-center">
-      <h1 class="sitename">Ресторан</h1>
-    </a>
-    <nav id="navmenu" class="navmenu">
-      <ul>
-        <li><a href="{% url 'index' %}">Головна</a></li>
-        <li><a href="{% url 'menu' %}">Меню</a></li>
-      </ul>
-      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-    </nav>
+<header id="header" class="header fixed-top">
+
+  <div class="topbar d-flex align-items-center">
+    <div class="container d-flex justify-content-center justify-content-md-between">
+      <div class="contact-info d-flex align-items-center">
+        <i class="bi bi-envelope d-flex align-items-center"><a href="mailto:contact@example.com">restknu@gmail.com</a></i>
+        <i class="bi bi-phone d-flex align-items-center ms-4"><span>+38 097 777 77 77</span></i>
+      </div>
+      <div class="languages d-none d-md-flex align-items-center">
+        <ul>
+          <li>Uk</li>
+        </ul>
+      </div>
+    </div>
   </div>
+
+  <div class="branding d-flex align-items-center">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">Ресторан</h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}" {% block nav_home %}{% endblock %}>Головна</a></li>
+          <li><a href="{% url 'menu' %}" {% block nav_menu %}{% endblock %}>Меню</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+      <a class="btn-book-a-table d-none d-xl-block" href="{% url 'menu' %}">Зробити замовлення</a>
+    </div>
+  </div>
+
 </header>
 
-<main>
+<main class="main">
   {% block content %}{% endblock %}
 </main>
 
 <footer id="footer" class="footer dark-background">
-  <div class="container">
-    <div class="copyright text-center">
-      <p>© 2024 Ресторан. Всі права захищені.</p>
+  <div class="container footer-top">
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 footer-about">
+        <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+          <span class="sitename">Ресторан</span>
+        </a>
+        <div class="footer-contact pt-3">
+          <p>вул. Хрещатик, 1</p>
+          <p>Київ, Україна</p>
+          <p class="mt-3"><strong>Телефон:</strong> <span>+38 097 777 77 77</span></p>
+          <p><strong>Email:</strong> <span>info@restaurant.com</span></p>
+        </div>
+        <div class="social-links d-flex mt-4">
+          <a href=""><i class="bi bi-facebook"></i></a>
+          <a href=""><i class="bi bi-instagram"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-3 footer-links">
+        <h4>Навігація</h4>
+        <ul>
+          <li><a href="{% url 'index' %}">Головна</a></li>
+          <li><a href="{% url 'menu' %}">Меню</a></li>
+        </ul>
+      </div>
     </div>
   </div>
+  <div class="container copyright text-center mt-4">
+    <p>© 2024 <strong class="px-1 sitename">Ресторан</strong> Всі права захищені.</p>
+  </div>
 </footer>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
+  <i class="bi bi-arrow-up-short"></i>
+</a>
+<div id="preloader"></div>
 
 <script src="{% static 'frontend/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'frontend/vendor/aos/aos.js' %}"></script>
 <script src="{% static 'frontend/vendor/glightbox/js/glightbox.min.js' %}"></script>
+<script src="{% static 'frontend/vendor/imagesloaded/imagesloaded.pkgd.min.js' %}"></script>
+<script src="{% static 'frontend/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
 <script src="{% static 'frontend/vendor/swiper/swiper-bundle.min.js' %}"></script>
 <script src="{% static 'frontend/js/main.js' %}"></script>
 </body>
