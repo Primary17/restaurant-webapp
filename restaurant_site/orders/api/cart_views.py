@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 
 from menu.models import Dish
 from orders.models import Cart, CartItem, CartItemAddon, CartItemIngredient, Order
+# Імпортуємо нову модель з єдиної точки входу, щоб не було циклічних імпортів
+from orders.models import CartItemRemovedIngredient
 from orders.services.cart_services import checkout_cart
 from orders.services.validation_service import validate_order_line
 
@@ -29,6 +31,7 @@ class CartView(APIView):
             .prefetch_related(
                 'addons__addon',
                 'ingredients__ingredient_option__ingredient',
+                'removed_ingredients__ingredient', 
             )
         )
         return Response({
@@ -55,9 +58,10 @@ class AddToCartView(APIView):
 
         addon_ids = data.get('addons') or []
         ing_ids = data.get('ingredients') or []
+        removed_ing_ids = data.get('removed_ingredients') or []
 
         try:
-            validate_order_line(dish, addon_ids, ing_ids)
+            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids)
         except ValueError as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -76,6 +80,12 @@ class AddToCartView(APIView):
                 item=item,
                 ingredient_option_id=iid,
             )
+            
+        for riid in removed_ing_ids:
+            CartItemRemovedIngredient.objects.create(
+                item=item,
+                ingredient_id=riid,
+            )
 
         item = (
             CartItem.objects.filter(pk=item.pk)
@@ -83,6 +93,7 @@ class AddToCartView(APIView):
             .prefetch_related(
                 'addons__addon',
                 'ingredients__ingredient_option__ingredient',
+                'removed_ingredients__ingredient',
             )
             .first()
         )
@@ -101,6 +112,7 @@ class CartItemDetailView(APIView):
             CartItem.objects.select_related('dish').prefetch_related(
                 'addons__addon',
                 'ingredients__ingredient_option__ingredient',
+                'removed_ingredients__ingredient',
             ),
             pk=pk,
             cart=cart,
@@ -142,6 +154,7 @@ class CheckoutView(APIView):
             .prefetch_related(
                 'items__addons',
                 'items__ingredients',
+                'items__removed_ingredients', 
             )
             .first()
         )
@@ -149,3 +162,4 @@ class CheckoutView(APIView):
             OrderSerializer(order).data,
             status=status.HTTP_201_CREATED,
         )
+    

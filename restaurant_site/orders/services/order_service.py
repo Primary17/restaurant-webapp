@@ -3,10 +3,16 @@ from decimal import Decimal
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from menu.models import Addon, Dish, IngredientOption
-from orders.models import Order, OrderItem, OrderItemAddon, OrderItemIngredient
-from orders.services.validation_service import validate_order_line
+from menu.models import Addon, Dish, IngredientOption, Ingredient
 
+from orders.models import (
+    Order, 
+    OrderItem, 
+    OrderItemAddon, 
+    OrderItemIngredient, 
+    OrderItemRemovedIngredient
+)
+from orders.services.validation_service import validate_order_line
 
 @transaction.atomic
 def create_order(user, data):
@@ -39,9 +45,10 @@ def create_order(user, data):
 
         addon_ids = item_data.get("addons") or []
         ing_ids = item_data.get("ingredients") or []
+        removed_ing_ids = item_data.get("removed_ingredients") or [] 
 
         try:
-            validate_order_line(dish, addon_ids, ing_ids)
+            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids)
         except ValueError as exc:
             raise ValidationError({"items": str(exc)}) from exc
 
@@ -75,6 +82,14 @@ def create_order(user, data):
                 price_delta=ing.price_delta,
             )
             item_total += ing.price_delta
+
+        for ing_id in removed_ing_ids:
+            ing = Ingredient.objects.get(pk=ing_id)
+            OrderItemRemovedIngredient.objects.create(
+                item=item,
+                ingredient=ing,
+                name=ing.name
+            )
 
         item_total *= item.quantity
 

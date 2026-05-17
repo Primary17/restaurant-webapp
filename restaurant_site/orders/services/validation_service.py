@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Iterable
 
-from menu.models import Addon, DishAddonGroup, IngredientGroup, IngredientOption
+from menu.models import Addon, DishAddonGroup, IngredientGroup, IngredientOption, Ingredient
 
 
 def _addon_category_ids_under(root) -> list[int]:
@@ -94,7 +94,35 @@ def validate_ingredient_options_for_dish(dish, selected_option_ids: Iterable[int
             )
 
 
-def validate_order_line(dish, addon_ids: Iterable[int], ingredient_option_ids: Iterable[int]) -> None:
+def validate_removed_ingredients(dish, removed_ingredient_ids: Iterable[int]) -> None:
+    """Перевіряє, що інгредієнти, які вилучаються, дійсно є у складі цієї страви."""
+    removed_ingredient_ids = list(removed_ingredient_ids or [])
+    if not removed_ingredient_ids:
+        return
+
+    if len(removed_ingredient_ids) != len(set(removed_ingredient_ids)):
+        raise ValueError("Дублікати ідентифікаторів у списку вилучених інгредієнтів")
+
+    allowed_ingredient_ids = set(
+        Ingredient.objects.filter(
+            ingredientoption__group__dish=dish
+        ).values_list('id', flat=True)
+    )
+
+    missing = set(removed_ingredient_ids) - allowed_ingredient_ids
+    if missing:
+        raise ValueError(
+            "Неможливо видалити інгредієнти з ID %s, оскільки вони не входять до складу страви" 
+            % sorted(missing)
+        )
+
+def validate_order_line(
+    dish, 
+    addon_ids: Iterable[int], 
+    ingredient_option_ids: Iterable[int],
+    removed_ingredient_ids: Iterable[int] = None
+) -> None:
     """Повна перевірка одного рядка замовлення / кошика."""
     validate_addons_for_dish(dish, addon_ids)
     validate_ingredient_options_for_dish(dish, ingredient_option_ids)
+    validate_removed_ingredients(dish, removed_ingredient_ids)
