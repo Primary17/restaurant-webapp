@@ -574,4 +574,61 @@
     "is_default": false
   }
 }
+,
+{
+  "model": "menu.dish",
+  "pk": 5,
+  "fields": {
+    "name": "Салат Капрезе з моцарелою",
+    "category": 2,
+    "base_price": "280.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 8,
+  "fields": {
+    "name": "Сир Моцарела",
+    "image": ""
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 9,
+  "fields": {
+    "name": "Томати",
+    "image": ""
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 4,
+  "fields": {
+    "dish": 5,
+    "name": "Склад салату",
+    "is_required": true,
+    "max_choices": 2
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 10,
+  "fields": {
+    "group": 4,
+    "ingredient": 8,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 11,
+  "fields": {
+    "group": 4,
+    "ingredient": 9,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+}
 ]
