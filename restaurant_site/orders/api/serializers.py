@@ -129,4 +129,24 @@ class AddCartItemSerializer(serializers.Serializer):
 
 
 class CartItemQuantitySerializer(serializers.Serializer):
-    quantity = serializers.IntegerField(min_value=1)
+    dish_id = serializers.IntegerField(source='dish.id', read_only=True)
+    dish_name = serializers.CharField(source='dish.name', read_only=True)
+    addons = CartItemAddonReadSerializer(many=True, read_only=True)
+    ingredients = CartItemIngredientReadSerializer(many=True, read_only=True)
+    
+    # Виводимо наші обчислювальні поля з моделей
+    price_per_unit = serializers.ReadOnlyField()
+    total_price = serializers.ReadOnlyField()
+
+    class Meta:
+        model = CartItem
+        fields = [
+            'id', 
+            'dish_id', 
+            'dish_name', 
+            'quantity', 
+            'price_per_unit',
+            'total_price',
+            'addons', 
+            'ingredients'
+        ]

@@ -31,7 +31,9 @@ class CartView(APIView):
                 'ingredients__ingredient_option__ingredient',
             )
         )
-        return Response({'items': CartItemReadSerializer(items, many=True).data})
+        return Response({
+            'cart_total_price': cart.total_price,
+            'items': CartItemReadSerializer(items, many=True).data})
 
 
 class AddToCartView(APIView):
