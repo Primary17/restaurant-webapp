@@ -3,6 +3,7 @@ from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from menu.models.dish import Dish
+from menu.models.category import Category
 from menu.api.filters import DishFilter
 
 from menu.models import Category, Dish
@@ -26,13 +27,11 @@ class CategoryTreeView(generics.ListAPIView):
 
 class DishListView(generics.ListAPIView):
     """
-    Каталог страв із підтримкою ієрархічної фільтрації за категоріями (MPTT).
+    Каталог страв із підтримкою MPTT категорій та фільтрації за інгредієнтами.
     """
 
     permission_classes = [AllowAny]
     serializer_class = DishListSerializer
-
-    # Підключаємо систему фільтрації DjangoFilterBackend
     filter_backends = [DjangoFilterBackend]
     filterset_class = DishFilter
 
@@ -41,7 +40,8 @@ class DishListView(generics.ListAPIView):
         return (
             Dish.objects.filter(is_active=True)
             .select_related("category")
-            .prefetch_related("images")
+            # Додаємо префетч для інгредієнтів, щоб усе літало
+            .prefetch_related("images", "ingredient_groups__options__ingredient")
             .order_by("name")
         )
 

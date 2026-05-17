@@ -523,4 +523,55 @@
     "image": ""
   }
 }
+,
+{
+  "model": "menu.dish",
+  "pk": 4,
+  "fields": {
+    "name": "Тестовий стейк із тунця",
+    "category": 3,
+    "base_price": "550.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.dishaddongroup",
+  "pk": 5,
+  "fields": {
+    "dish": 4,
+    "category": 1,
+    "is_required": false,
+    "max_choices": 1
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 3,
+  "fields": {
+    "dish": 4,
+    "name": "Опції тунця",
+    "is_required": true,
+    "max_choices": 2
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 8,
+  "fields": {
+    "group": 3,
+    "ingredient": 1,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 9,
+  "fields": {
+    "group": 3,
+    "ingredient": 6,
+    "price_delta": "0.00",
+    "is_default": false
+  }
+}
 ]
