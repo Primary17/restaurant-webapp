@@ -312,6 +312,16 @@
   }
 },
 {
+  "model": "menu.dishaddongroup",
+  "pk": 5,
+  "fields": {
+    "dish": 4,
+    "category": 1,
+    "is_required": false,
+    "max_choices": 1
+  }
+},
+{
   "model": "menu.dish",
   "pk": 1,
   "fields": {
@@ -338,6 +348,26 @@
     "name": "Цитрусовий лимонад",
     "category": 9,
     "base_price": "65.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 4,
+  "fields": {
+    "name": "Тестовий стейк із тунця",
+    "category": 3,
+    "base_price": "550.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 5,
+  "fields": {
+    "name": "Салат Капрезе з моцарелою",
+    "category": 2,
+    "base_price": "280.00",
     "is_active": true
   }
 },
@@ -395,6 +425,26 @@
     "name": "Маринади",
     "is_required": true,
     "max_choices": 1
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 3,
+  "fields": {
+    "dish": 4,
+    "name": "Опції тунця",
+    "is_required": true,
+    "max_choices": 2
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 4,
+  "fields": {
+    "dish": 5,
+    "name": "Склад салату",
+    "is_required": true,
+    "max_choices": 2
   }
 },
 {
@@ -468,93 +518,6 @@
   }
 },
 {
-  "model": "menu.ingredient",
-  "pk": 1,
-  "fields": {
-    "name": "Rare",
-    "image": "ingredients/rare.png"
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 2,
-  "fields": {
-    "name": "Medium Rare",
-    "image": "ingredients/medium_rare.png"
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 3,
-  "fields": {
-    "name": "Medium",
-    "image": "ingredients/medium.png"
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 4,
-  "fields": {
-    "name": "Medium Well",
-    "image": "ingredients/medium_well.png"
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 5,
-  "fields": {
-    "name": "Well Done",
-    "image": "ingredients/well_done.png"
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 6,
-  "fields": {
-    "name": "Класичний маринад",
-    "image": ""
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 7,
-  "fields": {
-    "name": "Гострий азійський маринад",
-    "image": ""
-  }
-}
-,
-{
-  "model": "menu.dish",
-  "pk": 4,
-  "fields": {
-    "name": "Тестовий стейк із тунця",
-    "category": 3,
-    "base_price": "550.00",
-    "is_active": true
-  }
-},
-{
-  "model": "menu.dishaddongroup",
-  "pk": 5,
-  "fields": {
-    "dish": 4,
-    "category": 1,
-    "is_required": false,
-    "max_choices": 1
-  }
-},
-{
-  "model": "menu.ingredientgroup",
-  "pk": 3,
-  "fields": {
-    "dish": 4,
-    "name": "Опції тунця",
-    "is_required": true,
-    "max_choices": 2
-  }
-},
-{
   "model": "menu.ingredientoption",
   "pk": 8,
   "fields": {
@@ -573,43 +536,6 @@
     "price_delta": "0.00",
     "is_default": false
   }
-}
-,
-{
-  "model": "menu.dish",
-  "pk": 5,
-  "fields": {
-    "name": "Салат Капрезе з моцарелою",
-    "category": 2,
-    "base_price": "280.00",
-    "is_active": true
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 8,
-  "fields": {
-    "name": "Сир Моцарела",
-    "image": ""
-  }
-},
-{
-  "model": "menu.ingredient",
-  "pk": 9,
-  "fields": {
-    "name": "Томати",
-    "image": ""
-  }
-},
-{
-  "model": "menu.ingredientgroup",
-  "pk": 4,
-  "fields": {
-    "dish": 5,
-    "name": "Склад салату",
-    "is_required": true,
-    "max_choices": 2
-  }
 },
 {
   "model": "menu.ingredientoption",
@@ -626,6 +552,164 @@
   "pk": 11,
   "fields": {
     "group": 4,
+    "ingredient": 9,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 1,
+  "fields": {
+    "name": "Rare",
+    "image": "ingredients/rare.png",
+    "is_vegan": false,
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 2,
+  "fields": {
+    "name": "Medium Rare",
+    "image": "ingredients/medium_rare.png",
+    "is_vegan": false,
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 3,
+  "fields": {
+    "name": "Medium",
+    "image": "ingredients/medium.png",
+    "is_vegan": false,
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 4,
+  "fields": {
+    "name": "Medium Well",
+    "image": "ingredients/medium_well.png",
+    "is_vegan": false,
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 5,
+  "fields": {
+    "name": "Well Done",
+    "image": "ingredients/well_done.png",
+    "is_vegan": false,
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 6,
+  "fields": {
+    "name": "Класичний маринад",
+    "image": "",
+    "is_vegan": false,
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 7,
+  "fields": {
+    "name": "Гострий азійський маринад",
+    "image": "",
+    "is_vegan": false,
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 8,
+  "fields": {
+    "name": "Сир Моцарела",
+    "image": "",
+    "is_vegan": false,
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "is_lactose_free": false,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 9,
+  "fields": {
+    "name": "Томати",
+    "image": "",
+    "is_vegan": true,
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+}
+,
+{
+  "model": "menu.dish",
+  "pk": 6,
+  "fields": {
+    "name": "Теплий салат із телятиною та томатами",
+    "category": 2,
+    "base_price": "340.00",
+    "is_active": true
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 5,
+  "fields": {
+    "dish": 6,
+    "name": "Склад салату з телятиною",
+    "is_required": true,
+    "max_choices": 2
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 12,
+  "fields": {
+    "group": 5,
+    "ingredient": 3,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 13,
+  "fields": {
+    "group": 5,
     "ingredient": 9,
     "price_delta": "0.00",
     "is_default": true

@@ -25,7 +25,9 @@ class DishFilter(django_filters.FilterSet):
         choices=[
             ('vegan', 'Веганське'),
             ('vegetarian', 'Вегетаріанське'),
-            ('gluten_free', 'Без глютену')
+            ('gluten_free', 'Без глютену'),
+            ('lactose_free', 'Без лактози'),  # <-- ДОДАЛИ
+            ('nut_free', 'Без горіхів')
         ],
         method="filter_by_diet"
     )
@@ -80,27 +82,15 @@ class DishFilter(django_filters.FilterSet):
         if not value:
             return queryset
 
-        # Визначаємо заборонені слова для назв інгредієнтів, страв та категорій
         if value == 'vegan':
-            forbidden_keywords = ['стейк', 'маринад', 'тунець', 'курк', 'м\'яс', 'сир', 'яйц', 'тартар', 'риб']
+            return queryset.filter(is_vegan=True)
         elif value == 'vegetarian':
-            forbidden_keywords = ['стейк', 'маринад', 'тунець', 'курк', 'м\'яс', 'тартар', 'риб']
+            return queryset.filter(is_vegetarian=True)
         elif value == 'gluten_free':
-            forbidden_keywords = ['грінк', 'бріош', 'хліб', 'борошн', 'тіст', 'випіч']
-        else:
-            return queryset
+            return queryset.filter(is_gluten_free=True)
+        elif value == 'lactose_free':
+            return queryset.filter(is_lactose_free=True)
+        elif value == 'nut_free':
+            return queryset.filter(is_nut_free=True)
 
-        query_filter = Q()
-        for word in forbidden_keywords:
-            query_filter |= Q(ingredient_groups__options__ingredient__name__icontains=word)
-            query_filter |= Q(name__icontains=word)
-            query_filter |= Q(category__name__icontains=word)
-
-        invalid_dish_ids = (
-            queryset.filter(query_filter)
-            .values_list('id', flat=True)
-            .distinct()
-        )
-
-        # Повертаємо тільки ті страви, які є абсолютно чистими
-        return queryset.exclude(id__in=invalid_dish_ids)
+        return queryset
