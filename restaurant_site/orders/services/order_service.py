@@ -4,7 +4,6 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from menu.models import Addon, Dish, IngredientOption, Ingredient
-
 from orders.models import (
     Order, 
     OrderItem, 
@@ -75,13 +74,22 @@ def create_order(user, data):
 
         for ing_id in ing_ids:
             ing = IngredientOption.objects.get(pk=ing_id)
+            group_name_lower = ing.group.name.lower()
+            
+            if "розмір" in group_name_lower or "об'єм" in group_name_lower or "обєм" in group_name_lower:
+
+                calculated_delta = (dish.base_price * ing.price_delta / Decimal("100.00")).quantize(Decimal("0.01"))
+            else:
+
+                calculated_delta = ing.price_delta
+
             OrderItemIngredient.objects.create(
                 item=item,
                 ingredient=ing.ingredient,
                 name=ing.ingredient.name,
-                price_delta=ing.price_delta,
+                price_delta=calculated_delta,
             )
-            item_total += ing.price_delta
+            item_total += calculated_delta
 
         for ing_id in removed_ing_ids:
             ing = Ingredient.objects.get(pk=ing_id)

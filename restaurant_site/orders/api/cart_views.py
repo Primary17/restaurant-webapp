@@ -17,6 +17,7 @@ from .serializers import (
     CartItemReadSerializer,
     CheckoutSerializer,
     OrderSerializer,
+    CartSerializer,
 )
 
 
@@ -24,19 +25,14 @@ class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Отримуємо кошик користувача
         cart, _ = Cart.objects.get_or_create(user=request.user)
-        items = (
-            cart.items.all()
-            .select_related('dish')
-            .prefetch_related(
-                'addons__addon',
-                'ingredients__ingredient_option__ingredient',
-                'removed_ingredients__ingredient', 
-            )
-        )
-        return Response({
-            'cart_total_price': cart.total_price,
-            'items': CartItemReadSerializer(items, many=True).data})
+        
+        # Передаємо об'єкт у CartSerializer, який сам прожене предзавантаження
+        # та вирахує 100% точну суму на основі відрендерених даних
+        serializer = CartSerializer(cart)
+        
+        return Response(serializer.data)
 
 
 class AddToCartView(APIView):

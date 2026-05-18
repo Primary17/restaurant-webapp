@@ -714,5 +714,84 @@
     "price_delta": "0.00",
     "is_default": true
   }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 10,
+  "fields": {
+    "name": "Маленький",
+    "image": "ingredients/small.png",
+    "is_vegan": true,
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 11,
+  "fields": {
+    "name": "Середній",
+    "image": "ingredients/medium_size.png",
+    "is_vegan": true,
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredient",
+  "pk": 12,
+  "fields": {
+    "name": "Великий",
+    "image": "ingredients/large.png",
+    "is_vegan": true,
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "is_lactose_free": true,
+    "is_nut_free": true
+  }
+},
+{
+  "model": "menu.ingredientgroup",
+  "pk": 6,
+  "fields": {
+    "dish": 3,
+    "name": "Розмір порції",
+    "is_required": true,
+    "max_choices": 1
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 14,
+  "fields": {
+    "group": 6,
+    "ingredient": 10,
+    "price_delta": "0.00",
+    "is_default": true
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 15,
+  "fields": {
+    "group": 6,
+    "ingredient": 11,
+    "price_delta": "20.00",
+    "is_default": false
+  }
+},
+{
+  "model": "menu.ingredientoption",
+  "pk": 16,
+  "fields": {
+    "group": 6,
+    "ingredient": 12,
+    "price_delta": "40.00",
+    "is_default": false
+  }
 }
 ]
