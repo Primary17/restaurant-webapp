@@ -5,7 +5,7 @@ from orders.services.order_service import create_order
 def checkout_cart(user, data):
     cart = Cart.objects.prefetch_related(
         'items__dish', 'items__addons', 'items__ingredients', 
-        'items__removed_ingredients', 'items__added_ingredients'
+        'items__removed_ingredients'
     ).select_related('user').get(user=user)
 
     if not cart.items.exists():
@@ -20,7 +20,7 @@ def checkout_cart(user, data):
             "addons": [a.addon_id for a in item.addons.all()], 
             "ingredients": [i.ingredient_option_id for i in item.ingredients.all()],
             "removed_ingredients": [r.ingredient_id for r in item.removed_ingredients.all()],
-            "added_ingredients": [ai.ingredient_id for ai in item.added_ingredients.all()]
+            "added_ingredients": [] 
         })
 
     order_data = {

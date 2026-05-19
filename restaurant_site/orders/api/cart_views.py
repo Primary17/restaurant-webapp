@@ -66,25 +66,16 @@ class AddToCartView(APIView):
             quantity=data['quantity'],
         )
         for aid in addon_ids:
-            CartItemAddon.objects.create(
-                item=item,
-                addon_id=aid,
-            )
+            CartItemAddon.objects.create(item=item, addon_id=aid)
+            
+        for aiid in added_ing_ids:
+            CartItemAddon.objects.create(item=item, addon_id=aiid)
+
         for iid in ing_ids:
-            CartItemIngredient.objects.create(
-                item=item,
-                ingredient_option_id=iid,
-            )
+            CartItemIngredient.objects.create(item=item, ingredient_option_id=iid)
             
         for riid in removed_ing_ids:
-            CartItemRemovedIngredient.objects.create(
-                item=item,
-                ingredient_id=riid,
-            )
-
-        from orders.models import CartItemAddedIngredient
-        for aiid in added_ing_ids:
-            CartItemAddedIngredient.objects.create(item=item, ingredient_id=aiid)
+            CartItemRemovedIngredient.objects.create(item=item, ingredient_id=riid)
 
         item = (
             CartItem.objects.filter(pk=item.pk)
@@ -93,7 +84,6 @@ class AddToCartView(APIView):
                 'addons__addon',
                 'ingredients__ingredient_option__ingredient',
                 'removed_ingredients__ingredient',
-                'added_ingredients__ingredient',
             )
             .first()
         )
@@ -154,8 +144,7 @@ class CheckoutView(APIView):
             .prefetch_related(
                 'items__addons',
                 'items__ingredients',
-                'items__removed_ingredients', 
-                'items__added_ingredients',
+                'items__removed_ingredients'
             )
             .first()
         )

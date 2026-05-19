@@ -8,13 +8,11 @@ from orders.models import (
     CartItemAddon,
     CartItemIngredient,
     CartItemRemovedIngredient,
-    CartItemAddedIngredient,
     Order,
     OrderItem,
     OrderItemAddon,
     OrderItemIngredient,
     OrderItemRemovedIngredient,
-    OrderItemAddedIngredient,
 )
 
 class OrderItemAddonSerializer(serializers.ModelSerializer):
@@ -35,22 +33,16 @@ class OrderItemRemovedIngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class OrderItemAddedIngredientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderItemAddedIngredient
-        fields = ['id', 'name', 'price']
-
 class OrderItemSerializer(serializers.ModelSerializer):
     addons = OrderItemAddonSerializer(many=True)
     ingredients = OrderItemIngredientSerializer(many=True)
     removed_ingredients = OrderItemRemovedIngredientSerializer(many=True, read_only=True)
-    added_ingredients = OrderItemAddedIngredientSerializer(many=True, read_only=True)
 
     class Meta:
         model = OrderItem
         fields = [
             'id', 'name', 'base_price', 'quantity', 'total_price',
-            'addons', 'ingredients', 'removed_ingredients', 'added_ingredients'
+            'addons', 'ingredients', 'removed_ingredients'
         ]
 
 
@@ -119,14 +111,7 @@ class CartItemRemovedIngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'ingredient_id', 'name']
 
 #СЕРІАЛІЗАТОР для читання доданих інгредієнтів/соусів у кошику
-class CartItemAddedIngredientReadSerializer(serializers.ModelSerializer):
-    ingredient_id = serializers.IntegerField(source='ingredient.id', read_only=True)
-    name = serializers.CharField(source='ingredient.name', read_only=True)
-    price = serializers.CharField(source='ingredient.price', read_only=True)
 
-    class Meta:
-        model = CartItemAddedIngredient
-        fields = ['id', 'ingredient_id', 'name', 'price']
 
 class CartItemReadSerializer(serializers.ModelSerializer):
     dish_id = serializers.IntegerField(source='dish.id', read_only=True)
@@ -134,7 +119,6 @@ class CartItemReadSerializer(serializers.ModelSerializer):
     addons = CartItemAddonReadSerializer(many=True, read_only=True)
     ingredients = CartItemIngredientReadSerializer(many=True, read_only=True)
     removed_ingredients = CartItemRemovedIngredientSerializer(many=True, read_only=True)
-    added_ingredients = CartItemAddedIngredientReadSerializer(many=True, read_only=True)
     
     price_per_unit = serializers.SerializerMethodField()
     total_price = serializers.SerializerMethodField()
@@ -143,29 +127,26 @@ class CartItemReadSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = [
             'id', 'dish_id', 'dish_name', 'quantity', 'price_per_unit', 
-            'total_price', 'addons', 'ingredients', 'removed_ingredients', 'added_ingredients'
+            'total_price', 'addons', 'ingredients', 'removed_ingredients'
         ]
 
     def get_price_per_unit(self, obj):
-        item_total = Decimal(str(obj.dish.base_price))
+        dish = obj.dish
+        item_total = dish.base_price
 
-        for item_addon in obj.addons.all():
-            item_total += Decimal(str(item_addon.addon.price))
+        # Тут автоматично порахуються абсолютно всі додатки та соуси!
+        for cart_addon in obj.addons.all():
+            item_total += cart_addon.addon.price
 
-        # 2. Обов'язкові опції з груп (прожарка, розмір тощо)
-        for item_ing in obj.ingredients.all():
-            ing = item_ing.ingredient_option
-            group_name_lower = ing.group.name.lower()
+        for cart_ing in obj.ingredients.all():
+            option = cart_ing.ingredient_option
+            group_name_lower = option.group.name.lower()
+
             if "розмір" in group_name_lower or "об'єм" in group_name_lower or "обєм" in group_name_lower:
-                calculated_delta = (obj.dish.base_price * ing.price_delta / Decimal("100.00")).quantize(Decimal("0.01"))
+                delta = (dish.base_price * option.price_delta / Decimal("100.00")).quantize(Decimal("0.01"))
             else:
-                calculated_delta = ing.price_delta
-            item_total += calculated_delta
-
-        # 3. КЛЮЧОВЕ ОНОВЛЕННЯ: твої кастомні додані інгредієнти (Томати, М'ята тощо)
-        if hasattr(obj, 'added_ingredients'):
-            for added_ing in obj.added_ingredients.all():
-                item_total += Decimal(str(added_ing.ingredient.price))
+                delta = option.price_delta
+            item_total += delta
 
         return float(item_total)
 

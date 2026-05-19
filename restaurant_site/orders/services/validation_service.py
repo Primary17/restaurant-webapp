@@ -136,8 +136,11 @@ def validate_order_line(
     removed_ingredient_ids: Iterable[int] = None,
     added_ingredient_ids: Iterable[int] = None
 ) -> None:
-    """Повна перевірка одного рядка замовлення / кошика."""
-    validate_addons_for_dish(dish, addon_ids)
+    """Повна перевірка одного рядка замовлення / кошика з урахуванням кастомних соусів."""
+    # Об'єднуємо звичайні аддони та кастомні додатки в один список для перевірки категорій
+    all_addons = list(addon_ids or []) + list(added_ingredient_ids or [])
+    
+    validate_addons_for_dish(dish, all_addons)
     validate_ingredient_options_for_dish(dish, ingredient_option_ids)
     validate_removed_ingredients(dish, removed_ingredient_ids)
-    validate_added_ingredients(added_ingredient_ids)
+

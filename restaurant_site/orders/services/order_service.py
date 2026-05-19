@@ -100,17 +100,6 @@ def create_order(user, data):
                 name=ing.name
             )
 
-        from orders.models import OrderItemAddedIngredient
-        for added_id in added_ing_ids:
-            ing = Ingredient.objects.get(pk=added_id)
-            OrderItemAddedIngredient.objects.create(
-                item=item,
-                ingredient=ing,
-                name=ing.name,
-                price=ing.price
-            )
-            item_total += ing.price
-
         item_total *= item.quantity
 
         item.total_price = item_total
