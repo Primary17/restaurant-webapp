@@ -147,25 +147,25 @@ class CartItemReadSerializer(serializers.ModelSerializer):
         ]
 
     def get_price_per_unit(self, obj):
-        dish = obj.dish
-        item_total = dish.base_price
+        item_total = Decimal(str(obj.dish.base_price))
 
-        for cart_addon in obj.addons.all():
-            item_total += cart_addon.addon.price
+        for item_addon in obj.addons.all():
+            item_total += Decimal(str(item_addon.addon.price))
 
-        for cart_ing in obj.ingredients.all():
-            option = cart_ing.ingredient_option
-            group_name_lower = option.group.name.lower()
-
+        # 2. Обов'язкові опції з груп (прожарка, розмір тощо)
+        for item_ing in obj.ingredients.all():
+            ing = item_ing.ingredient_option
+            group_name_lower = ing.group.name.lower()
             if "розмір" in group_name_lower or "об'єм" in group_name_lower or "обєм" in group_name_lower:
-                delta = (dish.base_price * option.price_delta / Decimal("100.00")).quantize(Decimal("0.01"))
+                calculated_delta = (obj.dish.base_price * ing.price_delta / Decimal("100.00")).quantize(Decimal("0.01"))
             else:
-                delta = option.price_delta
-            item_total += delta
+                calculated_delta = ing.price_delta
+            item_total += calculated_delta
 
-
-        for added_ing in obj.added_ingredients.all():
-            item_total += added_ing.ingredient.price
+        # 3. КЛЮЧОВЕ ОНОВЛЕННЯ: твої кастомні додані інгредієнти (Томати, М'ята тощо)
+        if hasattr(obj, 'added_ingredients'):
+            for added_ing in obj.added_ingredients.all():
+                item_total += Decimal(str(added_ing.ingredient.price))
 
         return float(item_total)
 

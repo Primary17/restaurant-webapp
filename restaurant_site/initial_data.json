@@ -666,15 +666,15 @@
   "pk": 9,
   "fields": {
     "name": "Томати",
-    "image": "",
+    "image": "ingredients/tomato.png",
     "is_vegan": true,
     "is_vegetarian": true,
     "is_gluten_free": true,
     "is_lactose_free": true,
-    "is_nut_free": true
+    "is_nut_free": true,
+    "price": "25.00"
   }
-}
-,
+},
 {
   "model": "menu.dish",
   "pk": 6,
