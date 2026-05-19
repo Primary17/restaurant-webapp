@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from menu.models import Dish
 from orders.models import Cart, CartItem, CartItemAddon, CartItemIngredient, Order
-# Імпортуємо нову модель з єдиної точки входу, щоб не було циклічних імпортів
+
 from orders.models import CartItemRemovedIngredient
 from orders.services.cart_services import checkout_cart
 from orders.services.validation_service import validate_order_line
@@ -25,11 +25,9 @@ class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Отримуємо кошик користувача
+
         cart, _ = Cart.objects.get_or_create(user=request.user)
         
-        # Передаємо об'єкт у CartSerializer, який сам прожене предзавантаження
-        # та вирахує 100% точну суму на основі відрендерених даних
         serializer = CartSerializer(cart)
         
         return Response(serializer.data)
@@ -55,9 +53,10 @@ class AddToCartView(APIView):
         addon_ids = data.get('addons') or []
         ing_ids = data.get('ingredients') or []
         removed_ing_ids = data.get('removed_ingredients') or []
+        added_ing_ids = data.get('added_ingredients') or []
 
         try:
-            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids)
+            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids, added_ing_ids)
         except ValueError as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,6 +82,10 @@ class AddToCartView(APIView):
                 ingredient_id=riid,
             )
 
+        from orders.models import CartItemAddedIngredient
+        for aiid in added_ing_ids:
+            CartItemAddedIngredient.objects.create(item=item, ingredient_id=aiid)
+
         item = (
             CartItem.objects.filter(pk=item.pk)
             .select_related('dish')
@@ -90,6 +93,7 @@ class AddToCartView(APIView):
                 'addons__addon',
                 'ingredients__ingredient_option__ingredient',
                 'removed_ingredients__ingredient',
+                'added_ingredients__ingredient',
             )
             .first()
         )
@@ -151,6 +155,7 @@ class CheckoutView(APIView):
                 'items__addons',
                 'items__ingredients',
                 'items__removed_ingredients', 
+                'items__added_ingredients',
             )
             .first()
         )

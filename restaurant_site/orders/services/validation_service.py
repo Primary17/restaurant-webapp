@@ -115,14 +115,29 @@ def validate_removed_ingredients(dish, removed_ingredient_ids: Iterable[int]) ->
             "Неможливо видалити інгредієнти з ID %s, оскільки вони не входять до складу страви" 
             % sorted(missing)
         )
+    
+def validate_added_ingredients(added_ingredient_ids: Iterable[int]) -> None:
+    """Перевіряє, що додані сторонні інгредієнти (соуси тощо) існують у базі."""
+    added_ingredient_ids = list(added_ingredient_ids or [])
+    if not added_ingredient_ids:
+        return
+
+    if len(added_ingredient_ids) != len(set(added_ingredient_ids)):
+        raise ValueError("Дублікати ідентифікаторів у списку доданих інгредієнтів")
+
+    found_count = Ingredient.objects.filter(pk__in=added_ingredient_ids).count()
+    if found_count != len(added_ingredient_ids):
+        raise ValueError("Один або кілька доданих інгредієнтів не знайдено в базі даних")
 
 def validate_order_line(
     dish, 
     addon_ids: Iterable[int], 
     ingredient_option_ids: Iterable[int],
-    removed_ingredient_ids: Iterable[int] = None
+    removed_ingredient_ids: Iterable[int] = None,
+    added_ingredient_ids: Iterable[int] = None
 ) -> None:
     """Повна перевірка одного рядка замовлення / кошика."""
     validate_addons_for_dish(dish, addon_ids)
     validate_ingredient_options_for_dish(dish, ingredient_option_ids)
     validate_removed_ingredients(dish, removed_ingredient_ids)
+    validate_added_ingredients(added_ingredient_ids)

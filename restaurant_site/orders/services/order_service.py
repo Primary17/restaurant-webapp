@@ -44,10 +44,11 @@ def create_order(user, data):
 
         addon_ids = item_data.get("addons") or []
         ing_ids = item_data.get("ingredients") or []
-        removed_ing_ids = item_data.get("removed_ingredients") or [] 
+        removed_ing_ids = item_data.get("removed_ingredients") or []
+        added_ing_ids = item_data.get("added_ingredients") or []
 
         try:
-            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids)
+            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids, added_ing_ids)
         except ValueError as exc:
             raise ValidationError({"items": str(exc)}) from exc
 
@@ -98,6 +99,17 @@ def create_order(user, data):
                 ingredient=ing,
                 name=ing.name
             )
+
+        from orders.models import OrderItemAddedIngredient
+        for added_id in added_ing_ids:
+            ing = Ingredient.objects.get(pk=added_id)
+            OrderItemAddedIngredient.objects.create(
+                item=item,
+                ingredient=ing,
+                name=ing.name,
+                price=ing.price
+            )
+            item_total += ing.price
 
         item_total *= item.quantity
 

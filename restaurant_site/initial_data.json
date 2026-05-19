@@ -793,5 +793,15 @@
     "price_delta": "40.00",
     "is_default": false
   }
+},
+{
+  "model": "menu.addon",
+  "pk": 9,
+  "fields": {
+    "name": "Томати екстра",
+    "image": "",
+    "category": 3,
+    "price": "40.00"
+  }
 }
 ]

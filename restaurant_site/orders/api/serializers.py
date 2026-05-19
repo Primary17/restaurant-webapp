@@ -1,18 +1,20 @@
-from decimal import Decimal  # Додали обов'язковий імпорт для розрахунків
+from decimal import Decimal
 from rest_framework import serializers
 
-from menu.models import Addon
+from menu.models import Addon, Ingredient
 from orders.models import (
     Cart,
     CartItem,
     CartItemAddon,
     CartItemIngredient,
     CartItemRemovedIngredient,
+    CartItemAddedIngredient,
     Order,
     OrderItem,
     OrderItemAddon,
     OrderItemIngredient,
-    OrderItemRemovedIngredient
+    OrderItemRemovedIngredient,
+    OrderItemAddedIngredient,
 )
 
 class OrderItemAddonSerializer(serializers.ModelSerializer):
@@ -33,22 +35,22 @@ class OrderItemRemovedIngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
+class OrderItemAddedIngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItemAddedIngredient
+        fields = ['id', 'name', 'price']
+
 class OrderItemSerializer(serializers.ModelSerializer):
     addons = OrderItemAddonSerializer(many=True)
     ingredients = OrderItemIngredientSerializer(many=True)
     removed_ingredients = OrderItemRemovedIngredientSerializer(many=True, read_only=True)
+    added_ingredients = OrderItemAddedIngredientSerializer(many=True, read_only=True)
 
     class Meta:
         model = OrderItem
         fields = [
-            'id',
-            'name',
-            'base_price',
-            'quantity',
-            'total_price',
-            'addons',
-            'ingredients',
-            'removed_ingredients',
+            'id', 'name', 'base_price', 'quantity', 'total_price',
+            'addons', 'ingredients', 'removed_ingredients', 'added_ingredients'
         ]
 
 
@@ -58,15 +60,8 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id',
-            'status',
-            'items_total',
-            'delivery_fee',
-            'total_price',
-            'address',
-            'comment',
-            'items',
-            'created_at'
+            'id', 'status', 'items_total', 'delivery_fee', 'total_price',
+            'address', 'comment', 'items', 'created_at'
         ]
 
 
@@ -123,6 +118,15 @@ class CartItemRemovedIngredientSerializer(serializers.ModelSerializer):
         model = CartItemRemovedIngredient
         fields = ['id', 'ingredient_id', 'name']
 
+#СЕРІАЛІЗАТОР для читання доданих інгредієнтів/соусів у кошику
+class CartItemAddedIngredientReadSerializer(serializers.ModelSerializer):
+    ingredient_id = serializers.IntegerField(source='ingredient.id', read_only=True)
+    name = serializers.CharField(source='ingredient.name', read_only=True)
+    price = serializers.CharField(source='ingredient.price', read_only=True)
+
+    class Meta:
+        model = CartItemAddedIngredient
+        fields = ['id', 'ingredient_id', 'name', 'price']
 
 class CartItemReadSerializer(serializers.ModelSerializer):
     dish_id = serializers.IntegerField(source='dish.id', read_only=True)
@@ -130,29 +134,21 @@ class CartItemReadSerializer(serializers.ModelSerializer):
     addons = CartItemAddonReadSerializer(many=True, read_only=True)
     ingredients = CartItemIngredientReadSerializer(many=True, read_only=True)
     removed_ingredients = CartItemRemovedIngredientSerializer(many=True, read_only=True)
+    added_ingredients = CartItemAddedIngredientReadSerializer(many=True, read_only=True)
     
-    # Змінили на SerializerMethodField, щоб динамічно рахувати відсотки в кошику
     price_per_unit = serializers.SerializerMethodField()
     total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
         fields = [
-            'id', 
-            'dish_id', 
-            'dish_name', 
-            'quantity', 
-            'price_per_unit', 
-            'total_price', 
-            'addons', 
-            'ingredients',
-            'removed_ingredients'
+            'id', 'dish_id', 'dish_name', 'quantity', 'price_per_unit', 
+            'total_price', 'addons', 'ingredients', 'removed_ingredients', 'added_ingredients'
         ]
 
     def get_price_per_unit(self, obj):
         dish = obj.dish
         item_total = dish.base_price
-
 
         for cart_addon in obj.addons.all():
             item_total += cart_addon.addon.price
@@ -165,8 +161,11 @@ class CartItemReadSerializer(serializers.ModelSerializer):
                 delta = (dish.base_price * option.price_delta / Decimal("100.00")).quantize(Decimal("0.01"))
             else:
                 delta = option.price_delta
-                
             item_total += delta
+
+
+        for added_ing in obj.added_ingredients.all():
+            item_total += added_ing.ingredient.price
 
         return float(item_total)
 
@@ -178,17 +177,10 @@ class CartItemReadSerializer(serializers.ModelSerializer):
 class AddCartItemSerializer(serializers.Serializer):
     dish_id = serializers.IntegerField(min_value=1)
     quantity = serializers.IntegerField(min_value=1, default=1)
-    addons = serializers.ListField(
-        child=serializers.IntegerField(min_value=1), required=False, default=list
-    )
-    ingredients = serializers.ListField(
-        child=serializers.IntegerField(min_value=1), required=False, default=list
-    )
-    
-    removed_ingredients = serializers.ListField(
-        child=serializers.IntegerField(min_value=1), required=False, default=list
-    )
-
+    addons = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False, default=list)
+    ingredients = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False, default=list)
+    removed_ingredients = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False, default=list)
+    added_ingredients = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False, default=list)
 
 class CartItemQuantitySerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1)
