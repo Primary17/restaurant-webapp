@@ -33,7 +33,8 @@ def validate_addons_for_dish(dish, selected_addon_ids: Iterable[int]) -> None:
     found_ids = {a.pk for a in addons}
     missing = set(selected_addon_ids) - found_ids
     if missing:
-        raise ValueError("Невідомі додатки: %s" % sorted(missing))
+        missing_labels = [f"[ID: {uid}]" for uid in sorted(missing)]
+        raise ValueError("Невідомі додатки: %s" % ", ".join(missing_labels))
 
     for addon in addons:
         if addon.category_id not in allowed_category_ids:
@@ -77,7 +78,8 @@ def validate_ingredient_options_for_dish(dish, selected_option_ids: Iterable[int
     found = {o.pk for o in options}
     missing = set(selected_option_ids) - found
     if missing:
-        raise ValueError("Невідомі опції інгредієнтів: %s" % sorted(missing))
+        missing_labels = [f"[ID: {uid}]" for uid in sorted(missing)]
+        raise ValueError("Невідомі опції інгредієнтів: %s" % ", ".join(missing_labels))
 
     by_group: dict[int, list[IngredientOption]] = defaultdict(list)
     for opt in options:
@@ -111,23 +113,21 @@ def validate_removed_ingredients(dish, removed_ingredient_ids: Iterable[int]) ->
 
     missing = set(removed_ingredient_ids) - allowed_ingredient_ids
     if missing:
+        invalid_ingredients = Ingredient.objects.filter(pk__in=missing)
+        
+        invalid_names = []
+        for uid in sorted(missing):
+            ing_obj = next((i for i in invalid_ingredients if i.pk == uid), None)
+            if ing_obj:
+                invalid_names.append(f"«{ing_obj.name}»")
+            else:
+                invalid_names.append(f"[Невідомий інгредієнт ID: {uid}]")
+
         raise ValueError(
-            "Неможливо видалити інгредієнти з ID %s, оскільки вони не входять до складу страви" 
-            % sorted(missing)
+            "Неможливо видалити інгредієнти %s, оскільки вони не входять до складу страви" 
+            % ", ".join(invalid_names)
         )
     
-def validate_added_ingredients(added_ingredient_ids: Iterable[int]) -> None:
-    """Перевіряє, що додані сторонні інгредієнти (соуси тощо) існують у базі."""
-    added_ingredient_ids = list(added_ingredient_ids or [])
-    if not added_ingredient_ids:
-        return
-
-    if len(added_ingredient_ids) != len(set(added_ingredient_ids)):
-        raise ValueError("Дублікати ідентифікаторів у списку доданих інгредієнтів")
-
-    found_count = Ingredient.objects.filter(pk__in=added_ingredient_ids).count()
-    if found_count != len(added_ingredient_ids):
-        raise ValueError("Один або кілька доданих інгредієнтів не знайдено в базі даних")
 
 def validate_order_line(
     dish, 
