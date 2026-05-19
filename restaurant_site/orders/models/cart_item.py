@@ -16,14 +16,11 @@ class CartItem(models.Model):
         Обчислює вартість однієї одиниці страви з урахуванням усіх 
         кастомізованих опцій інгредієнтів та додатків.
         """
-        # Базова ціна страви
         price = self.dish.base_price
         
-        # Додаємо дельти цін усіх обраних інгредієнтів
         for item_ingredient in self.ingredients.all():
             price += item_ingredient.ingredient_option.price_delta
-            
-        # Додаємо ціни всіх обраних додатків
+
         for item_addon in self.addons.all():
             price += item_addon.addon.price
             

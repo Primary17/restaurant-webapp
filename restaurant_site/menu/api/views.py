@@ -36,11 +36,9 @@ class DishListView(generics.ListAPIView):
     filterset_class = DishFilter
 
     def get_queryset(self):
-        # Повертаємо чистий оптимізований запит БЕЗ ручних фільтрацій за query_params
         return (
             Dish.objects.filter(is_active=True)
             .select_related("category")
-            # Додаємо префетч для інгредієнтів, щоб усе літало
             .prefetch_related("images", "ingredient_groups__options__ingredient")
             .order_by("name")
         )

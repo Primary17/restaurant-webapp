@@ -91,7 +91,6 @@ class CartView(APIView):
     def get(self, request):
         cart, _ = Cart.objects.get_or_create(user=request.user)
         
-        # Оптимально дістаємо всі елементи з пов'язаними даними
         items = cart.items.all().select_related('dish').prefetch_related(
             'addons__addon', 
             'ingredients__ingredient_option__group',
@@ -99,11 +98,8 @@ class CartView(APIView):
             'removed_ingredients__ingredient'
         )
         
-        # Серіалізуємо елементи (отримуємо чистий масив JSON-об'єктів)
         serialized_items = CartItemReadSerializer(items, many=True).data
         
-        # ОСЬ ТУТ МАГІЯ: примусово конвертуємо кожне значення в Decimal з рядка,
-        # щоб обійти будь-який внутрішній кеш об'єктів Django!
         from decimal import Decimal
         cart_total_price = sum(Decimal(str(item['total_price'])) for item in serialized_items)
 
