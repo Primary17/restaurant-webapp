@@ -73,17 +73,52 @@
       <div class="col-md-5">
         <input type="text" id="search-input" class="form-control"
                placeholder="Пошук страви..." value="{{ search }}"
-               style="background:#1a1a1a; color:#fff; border-color:#333;">
+               style="background:#1a1a1a; color:#cda45e; border-color:#cda45e;">
       </div>
-      <div class="col-md-4">
-        <select id="ordering-select" class="form-select"
-                style="background:#1a1a1a; color:#fff; border-color:#333;">
-          <option value="">Сортування</option>
-          <option value="base_price" {% if ordering == 'base_price' %}selected{% endif %}>Ціна ↑</option>
-          <option value="-base_price" {% if ordering == '-base_price' %}selected{% endif %}>Ціна ↓</option>
-          <option value="name" {% if ordering == 'name' %}selected{% endif %}>Назва А-Я</option>
-          <option value="-name" {% if ordering == '-name' %}selected{% endif %}>Назва Я-А</option>
-        </select>
+    </div>
+      <!-- Сортування -->
+    <div class="row mt-3 mb-2">
+      <div class="col-12">
+        <label style="color:#cda45e; margin-bottom:10px; display:block;">Сортування:</label>
+        <div class="d-flex flex-wrap gap-4">
+
+          <div>
+            <span style="color:#aaa; font-size:0.9rem; display:block; margin-bottom:6px;">За ціною:</span>
+            <div class="d-flex gap-3">
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <input type="radio" name="sort-price" id="sort-price-asc" value="base_price"
+                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       {% if 'base_price' in ordering and '-base_price' not in ordering %}checked{% endif %}>
+                Ціна ↑
+              </label>
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <input type="radio" name="sort-price" id="sort-price-desc" value="-base_price"
+                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       {% if '-base_price' in ordering %}checked{% endif %}>
+                Ціна ↓
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <span style="color:#aaa; font-size:0.9rem; display:block; margin-bottom:6px;">За назвою:</span>
+            <div class="d-flex gap-3">
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <input type="radio" name="sort-name" id="sort-name-asc" value="name"
+                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       {% if ',name' in ordering or ordering == 'name' %}checked{% endif %}>
+                А-Я
+              </label>
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <input type="radio" name="sort-name" id="sort-name-desc" value="-name"
+                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       {% if ordering == '-name' %}checked{% endif %}>
+                Я-А
+              </label>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
@@ -99,42 +134,61 @@
       </div>
     </div>
 
-    <!-- Кнопки -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <button onclick="applyFilters()" class="btn me-2" style="background:#cda45e; color:#000; padding:8px 30px;">Знайти</button>
-        <a href="{% url 'menu' %}" class="btn" style="border:1px solid #cda45e; color:#cda45e; padding:8px 30px;">Скинути</a>
-      </div>
-    </div>
-
     <!-- Список страв -->
     <div class="row" id="dish-list">
-      {% for dish in dishes %}
-      <div class="col-lg-6 menu-item">
-        {% if dish.images.first %}
-        <img src="/media/{{ dish.images.first.image }}" class="menu-img" alt="{{ dish.name }}">
-        {% else %}
-        <img src="{% static 'frontend/img/menu/lobster-bisque.jpg' %}" class="menu-img" alt="{{ dish.name }}">
-        {% endif %}
-        <div class="menu-content">
-          <a href="{% url 'dish_detail' dish.id %}">{{ dish.name }}</a>
-          <span>{{ dish.base_price }} грн</span>
-        </div>
-        <div class="menu-ingredients">
-          {{ dish.category.name }}
-        </div>
-      </div>
-      {% empty %}
-      <div class="col-12 text-center" style="color:#aaa; padding:40px;">
-        <p>Страви не знайдено. Спробуйте інші фільтри.</p>
-      </div>
-      {% endfor %}
+      {% include 'frontend/partials/dish_list.html' %}
     </div>
 
   </div>
 </section>
 
 <script>
+document.getElementById('price-range').addEventListener('input', function() {
+  document.getElementById('price-label').textContent = this.value;
+  loadDishes();
+});
+
+function loadDishes() {
+  const url = new URL(window.location.href);
+  const search = document.getElementById('search-input').value;
+  const sortPriceEl = document.querySelector('input[name="sort-price"]:checked');
+  const sortNameEl = document.querySelector('input[name="sort-name"]:checked');
+  const sortPrice = sortPriceEl ? sortPriceEl.value : '';
+  const sortName = sortNameEl ? sortNameEl.value : '';
+  const priceMax = document.getElementById('price-range').value;
+
+  const params = new URLSearchParams();
+  if (url.searchParams.get('category')) params.set('category', url.searchParams.get('category'));
+  if (search) params.set('search', search);
+  const ordering = [sortPrice, sortName].filter(v => v !== '').join(',');
+  if (ordering) params.set('ordering', ordering);
+  params.set('price_min', 0);
+  params.set('price_max', priceMax);
+
+  fetch('/menu/ajax/?' + params.toString())
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('dish-list').innerHTML = data.html;
+    });
+}
+
+document.getElementById('search-input').addEventListener('input', loadDishes);
+
+document.querySelectorAll('input[name="sort-price"], input[name="sort-name"]').forEach(function(radio) {
+  radio.addEventListener('mousedown', function() {
+    this._wasChecked = this.checked;
+  });
+  radio.addEventListener('click', function() {
+    if (this._wasChecked) {
+      this.checked = false;
+      setTimeout(loadDishes, 10);
+    }
+  });
+  radio.addEventListener('change', function() {
+    setTimeout(loadDishes, 10);
+  });
+});
+
 document.querySelectorAll('.cat-parent').forEach(function(item) {
   item.addEventListener('mouseenter', function() {
     const dropdown = this.querySelector('.cat-dropdown');
@@ -159,38 +213,20 @@ document.querySelectorAll('.cat-child').forEach(function(item) {
 
 function filterCategory(categoryId) {
   const url = new URL(window.location.href);
-  url.searchParams.delete('search');
-  url.searchParams.delete('ordering');
-  url.searchParams.delete('price_max');
   if (categoryId) {
     url.searchParams.set('category', categoryId);
   } else {
     url.searchParams.delete('category');
   }
-  window.location.href = url.toString();
+  history.pushState({}, '', url.toString());
+  loadDishes();
+
+  document.querySelectorAll('.cat-parent').forEach(li => li.classList.remove('filter-active'));
+  document.querySelector('.menu-filters li:first-child').classList.remove('filter-active');
+  if (!categoryId) {
+    document.querySelector('.menu-filters li:first-child').classList.add('filter-active');
+  }
 }
-
-function applyFilters() {
-  const url = new URL(window.location.href);
-  const search = document.getElementById('search-input').value;
-  const ordering = document.getElementById('ordering-select').value;
-  const priceMax = document.getElementById('price-range').value;
-
-  if (search) url.searchParams.set('search', search);
-  else url.searchParams.delete('search');
-
-  if (ordering) url.searchParams.set('ordering', ordering);
-  else url.searchParams.delete('ordering');
-
-  if (priceMax < 1000) url.searchParams.set('price_max', priceMax);
-  else url.searchParams.delete('price_max');
-
-  window.location.href = url.toString();
-}
-
-document.getElementById('price-range').addEventListener('input', function() {
-  document.getElementById('price-label').textContent = this.value;
-});
 </script>
 
 {% endblock %}

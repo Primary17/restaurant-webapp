@@ -1,0 +1,21 @@
+{% load static %}
+{% for dish in dishes %}
+<div class="col-lg-6 menu-item">
+  {% if dish.images.first %}
+  <img src="/media/{{ dish.images.first.image }}" class="menu-img" alt="{{ dish.name }}">
+  {% else %}
+  <img src="{% static 'frontend/img/menu/lobster-bisque.jpg' %}" class="menu-img" alt="{{ dish.name }}">
+  {% endif %}
+  <div class="menu-content">
+    <a href="/menu/{{ dish.id }}/">{{ dish.name }}</a>
+    <span>{{ dish.base_price }} грн</span>
+  </div>
+  <div class="menu-ingredients">
+    {{ dish.category.name }}
+  </div>
+</div>
+{% empty %}
+<div class="col-12 text-center" style="color:#aaa; padding:40px;">
+  <p>Страви не знайдено. Спробуйте інші фільтри.</p>
+</div>
+{% endfor %}

@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from menu.models import Dish, Category
-
+from django.template.loader import render_to_string
+from django.http import JsonResponse
 
 def index(request):
     dishes = Dish.objects.filter(is_active=True)[:6]
@@ -62,6 +63,42 @@ def menu(request):
         'price_max': price_max or '1000',
     })
 
+def menu_ajax(request):
+    from django.db.models import Min, Max
+    category_id = request.GET.get('category', '')
+    search = request.GET.get('search', '')
+    ordering = request.GET.get('ordering', '')
+
+    price_range = Dish.objects.filter(is_active=True).aggregate(
+        min=Min('base_price'), max=Max('base_price')
+    )
+    min_price = int(price_range['min'] or 0)
+    max_price = int(price_range['max'] or 1000)
+
+    price_min = int(request.GET.get('price_min', min_price))
+    price_max = int(request.GET.get('price_max', max_price))
+
+    dishes = Dish.objects.filter(is_active=True)
+
+    if category_id:
+        try:
+            cat = Category.objects.get(id=category_id)
+            descendants = cat.get_descendants(include_self=True)
+            dishes = dishes.filter(category__in=descendants)
+        except Category.DoesNotExist:
+            pass
+
+    if search:
+        dishes = dishes.filter(name__icontains=search)
+
+    if ordering:
+        ordering_fields = [f.strip() for f in ordering.split(',')]
+        dishes = dishes.order_by(*ordering_fields)
+
+    dishes = dishes.filter(base_price__gte=price_min, base_price__lte=price_max)
+
+    html = render_to_string('frontend/partials/dish_list.html', {'dishes': dishes}, request=request)
+    return JsonResponse({'html': html})
 
 def dish_detail(request, dish_id):
     dish = get_object_or_404(Dish, id=dish_id)
