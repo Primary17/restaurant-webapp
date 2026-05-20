@@ -3,10 +3,15 @@ from decimal import Decimal
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from menu.models import Addon, Dish, IngredientOption
-from orders.models import Order, OrderItem, OrderItemAddon, OrderItemIngredient
+from menu.models import Addon, Dish, IngredientOption, Ingredient
+from orders.models import (
+    Order, 
+    OrderItem, 
+    OrderItemAddon, 
+    OrderItemIngredient, 
+    OrderItemRemovedIngredient
+)
 from orders.services.validation_service import validate_order_line
-
 
 @transaction.atomic
 def create_order(user, data):
@@ -39,9 +44,11 @@ def create_order(user, data):
 
         addon_ids = item_data.get("addons") or []
         ing_ids = item_data.get("ingredients") or []
+        removed_ing_ids = item_data.get("removed_ingredients") or []
+        added_ing_ids = item_data.get("added_ingredients") or []
 
         try:
-            validate_order_line(dish, addon_ids, ing_ids)
+            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids, added_ing_ids)
         except ValueError as exc:
             raise ValidationError({"items": str(exc)}) from exc
 
@@ -68,13 +75,30 @@ def create_order(user, data):
 
         for ing_id in ing_ids:
             ing = IngredientOption.objects.get(pk=ing_id)
+            group_name_lower = ing.group.name.lower()
+            
+            if "розмір" in group_name_lower or "об'єм" in group_name_lower or "обєм" in group_name_lower:
+
+                calculated_delta = (dish.base_price * ing.price_delta / Decimal("100.00")).quantize(Decimal("0.01"))
+            else:
+
+                calculated_delta = ing.price_delta
+
             OrderItemIngredient.objects.create(
                 item=item,
                 ingredient=ing.ingredient,
                 name=ing.ingredient.name,
-                price_delta=ing.price_delta,
+                price_delta=calculated_delta,
             )
-            item_total += ing.price_delta
+            item_total += calculated_delta
+
+        for ing_id in removed_ing_ids:
+            ing = Ingredient.objects.get(pk=ing_id)
+            OrderItemRemovedIngredient.objects.create(
+                item=item,
+                ingredient=ing,
+                name=ing.name
+            )
 
         item_total *= item.quantity
 

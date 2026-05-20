@@ -10,6 +10,7 @@ from menu.models import (
     DishImage,
     IngredientGroup,
     IngredientOption,
+    Ingredient,
 )
 
 
@@ -34,6 +35,12 @@ class IngredientOptionCatalogSerializer(serializers.ModelSerializer):
         ]
 
 
+class IngredientBriefSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name']
+
+
 class IngredientGroupCatalogSerializer(serializers.ModelSerializer):
     options = serializers.SerializerMethodField()
 
@@ -41,6 +48,7 @@ class IngredientGroupCatalogSerializer(serializers.ModelSerializer):
         model = IngredientGroup
         fields = ['id', 'name', 'is_required', 'max_choices', 'options']
 
+    # Повертаємо оригінальний метод на місце
     @extend_schema_field(IngredientOptionCatalogSerializer(many=True))
     def get_options(self, obj):
         qs = obj.options.all().select_related('ingredient')
@@ -122,13 +130,27 @@ class DishDetailSerializer(DishListSerializer):
     images = DishImageSerializer(many=True, read_only=True)
     addon_groups = DishAddonGroupCatalogSerializer(many=True, read_only=True)
     ingredient_groups = IngredientGroupCatalogSerializer(many=True, read_only=True)
+    selectable_ingredients = serializers.SerializerMethodField()
 
     class Meta(DishListSerializer.Meta):
         fields = DishListSerializer.Meta.fields + [
             'images',
             'addon_groups',
             'ingredient_groups',
+            'selectable_ingredients',
         ]
+        
+    @extend_schema_field(IngredientBriefSerializer(many=True))
+    def get_selectable_ingredients(self, obj):
+        """
+        Витягує всі унікальні інгредієнти, які прив'язані до опцій 
+        усіх груп цієї страви.
+        """
+        ingredients = Ingredient.objects.filter(
+            ingredientoption__group__dish=obj
+        ).distinct()
+        
+        return IngredientBriefSerializer(ingredients, many=True).data
 
 
 class CategoryTreeSerializer(serializers.ModelSerializer):
