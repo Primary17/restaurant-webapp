@@ -1,5 +1,10 @@
 from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
+from menu.models.dish import Dish
+from menu.models.category import Category
+from menu.api.filters import DishFilter
 
 from menu.models import Category, Dish
 
@@ -22,35 +27,21 @@ class CategoryTreeView(generics.ListAPIView):
 
 class DishListView(generics.ListAPIView):
     """
-    Каталог страв. Підтримані query-параметри (база для подальших фільтрів):
-    - category — id категорії;
-    - search — підрядок у назві (без урахування регістру);
-    - ordering — name, -name, base_price, -base_price, id, -id.
+    Каталог страв із підтримкою MPTT категорій та фільтрації за інгредієнтами.
     """
 
     permission_classes = [AllowAny]
     serializer_class = DishListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = DishFilter
 
     def get_queryset(self):
-        qs = (
+        return (
             Dish.objects.filter(is_active=True)
-            .select_related('category')
-            .prefetch_related('images')
+            .select_related("category")
+            .prefetch_related("images", "ingredient_groups__options__ingredient")
+            .order_by("name")
         )
-        category = self.request.query_params.get('category')
-        if category:
-            qs = qs.filter(category_id=category)
-        search = self.request.query_params.get('search', '').strip()
-        if search:
-            qs = qs.filter(name__icontains=search)
-        ordering = self.request.query_params.get('ordering', 'name')
-        allowed = {'name', '-name', 'base_price', '-base_price', 'id', '-id'}
-        if ordering in allowed:
-            qs = qs.order_by(ordering)
-        else:
-            qs = qs.order_by('name')
-        return qs
-
 
 class DishDetailView(generics.RetrieveAPIView):
     permission_classes = [AllowAny]

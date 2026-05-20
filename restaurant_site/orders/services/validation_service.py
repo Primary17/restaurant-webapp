@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Iterable
 
-from menu.models import Addon, DishAddonGroup, IngredientGroup, IngredientOption
+from menu.models import Addon, DishAddonGroup, IngredientGroup, IngredientOption, Ingredient
 
 
 def _addon_category_ids_under(root) -> list[int]:
@@ -33,7 +33,8 @@ def validate_addons_for_dish(dish, selected_addon_ids: Iterable[int]) -> None:
     found_ids = {a.pk for a in addons}
     missing = set(selected_addon_ids) - found_ids
     if missing:
-        raise ValueError("Невідомі додатки: %s" % sorted(missing))
+        missing_labels = [f"[ID: {uid}]" for uid in sorted(missing)]
+        raise ValueError("Невідомі додатки: %s" % ", ".join(missing_labels))
 
     for addon in addons:
         if addon.category_id not in allowed_category_ids:
@@ -77,7 +78,8 @@ def validate_ingredient_options_for_dish(dish, selected_option_ids: Iterable[int
     found = {o.pk for o in options}
     missing = set(selected_option_ids) - found
     if missing:
-        raise ValueError("Невідомі опції інгредієнтів: %s" % sorted(missing))
+        missing_labels = [f"[ID: {uid}]" for uid in sorted(missing)]
+        raise ValueError("Невідомі опції інгредієнтів: %s" % ", ".join(missing_labels))
 
     by_group: dict[int, list[IngredientOption]] = defaultdict(list)
     for opt in options:
@@ -94,7 +96,51 @@ def validate_ingredient_options_for_dish(dish, selected_option_ids: Iterable[int
             )
 
 
-def validate_order_line(dish, addon_ids: Iterable[int], ingredient_option_ids: Iterable[int]) -> None:
-    """Повна перевірка одного рядка замовлення / кошика."""
-    validate_addons_for_dish(dish, addon_ids)
+def validate_removed_ingredients(dish, removed_ingredient_ids: Iterable[int]) -> None:
+    """Перевіряє, що інгредієнти, які вилучаються, дійсно є у складі цієї страви."""
+    removed_ingredient_ids = list(removed_ingredient_ids or [])
+    if not removed_ingredient_ids:
+        return
+
+    if len(removed_ingredient_ids) != len(set(removed_ingredient_ids)):
+        raise ValueError("Дублікати ідентифікаторів у списку вилучених інгредієнтів")
+
+    allowed_ingredient_ids = set(
+        Ingredient.objects.filter(
+            ingredientoption__group__dish=dish
+        ).values_list('id', flat=True)
+    )
+
+    missing = set(removed_ingredient_ids) - allowed_ingredient_ids
+    if missing:
+        invalid_ingredients = Ingredient.objects.filter(pk__in=missing)
+        
+        invalid_names = []
+        for uid in sorted(missing):
+            ing_obj = next((i for i in invalid_ingredients if i.pk == uid), None)
+            if ing_obj:
+                invalid_names.append(f"«{ing_obj.name}»")
+            else:
+                invalid_names.append(f"[Невідомий інгредієнт ID: {uid}]")
+
+        raise ValueError(
+            "Неможливо видалити інгредієнти %s, оскільки вони не входять до складу страви" 
+            % ", ".join(invalid_names)
+        )
+    
+
+def validate_order_line(
+    dish, 
+    addon_ids: Iterable[int], 
+    ingredient_option_ids: Iterable[int],
+    removed_ingredient_ids: Iterable[int] = None,
+    added_ingredient_ids: Iterable[int] = None
+) -> None:
+    """Повна перевірка одного рядка замовлення / кошика з урахуванням кастомних соусів."""
+    # Об'єднуємо звичайні аддони та кастомні додатки в один список для перевірки категорій
+    all_addons = list(addon_ids or []) + list(added_ingredient_ids or [])
+    
+    validate_addons_for_dish(dish, all_addons)
     validate_ingredient_options_for_dish(dish, ingredient_option_ids)
+    validate_removed_ingredients(dish, removed_ingredient_ids)
+
