@@ -31,9 +31,24 @@ def menu(request):
     if search:
         dishes = dishes.filter(name__icontains=search)
     if ordering:
-        dishes = dishes.order_by(ordering)
+        ordering_fields = [f.strip() for f in ordering.split(',')]
+        dishes = dishes.order_by(*ordering_fields)
     if price_max:
         dishes = dishes.filter(base_price__lte=price_max)
+
+    # Фільтр по дієтах
+    diet = request.GET.get('diet', '')
+    if diet:
+        diet_map = {
+            'vegan': 'is_vegan',
+            'vegetarian': 'is_vegetarian',
+            'gluten_free': 'is_gluten_free',
+            'lactose_free': 'is_lactose_free',
+            'nut_free': 'is_nut_free',
+        }
+        for d in diet.split(','):
+            if d in diet_map:
+                dishes = dishes.filter(**{diet_map[d]: True})
 
     cats_with_dishes = set(
         Dish.objects.filter(is_active=True).values_list('category_id', flat=True)
@@ -60,6 +75,7 @@ def menu(request):
         'root_category_id': root_category_id,
         'search': search,
         'ordering': ordering,
+        'diet': diet,
         'price_max': price_max or '1000',
     })
 
@@ -79,6 +95,20 @@ def menu_ajax(request):
     price_max = int(request.GET.get('price_max', max_price))
 
     dishes = Dish.objects.filter(is_active=True)
+
+    # Фільтр по дієтах
+    diet = request.GET.get('diet', '')
+    if diet:
+        diet_map = {
+            'vegan': 'is_vegan',
+            'vegetarian': 'is_vegetarian',
+            'gluten_free': 'is_gluten_free',
+            'lactose_free': 'is_lactose_free',
+            'nut_free': 'is_nut_free',
+        }
+        for d in diet.split(','):
+            if d in diet_map:
+                dishes = dishes.filter(**{diet_map[d]: True})
 
     if category_id:
         try:
@@ -102,4 +132,9 @@ def menu_ajax(request):
 
 def dish_detail(request, dish_id):
     dish = get_object_or_404(Dish, id=dish_id)
-    return render(request, 'frontend/dish.html', {'dish': dish})
+    from menu.models import Ingredient, AddonCategory, Addon
+    all_ingredients = Ingredient.objects.all()
+    return render(request, 'frontend/dish.html', {
+        'dish': dish,
+        'all_ingredients': all_ingredients,
+    })

@@ -122,6 +122,40 @@
       </div>
     </div>
 
+  <!-- Фільтри по дієтах -->
+    <div class="row mt-3 mb-2">
+      <div class="col-12">
+        <label style="color:#cda45e; margin-bottom:10px; display:block;">Дієтичні вподобання:</label>
+        <div class="d-flex flex-wrap gap-3">
+          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="diet-vegan" value="vegan"
+                   style="accent-color:#cda45e; width:16px; height:16px;">
+            Веганське
+          </label>
+          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="diet-vegetarian" value="vegetarian"
+                   style="accent-color:#cda45e; width:16px; height:16px;">
+            Вегетаріанське
+          </label>
+          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="diet-gluten-free" value="gluten_free"
+                   style="accent-color:#cda45e; width:16px; height:16px;">
+            Без глютену
+          </label>
+          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="diet-lactose-free" value="lactose_free"
+                   style="accent-color:#cda45e; width:16px; height:16px;">
+            Без лактози
+          </label>
+          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="diet-nut-free" value="nut_free"
+                   style="accent-color:#cda45e; width:16px; height:16px;">
+            Без горіхів
+          </label>
+        </div>
+      </div>
+    </div>
+
     <!-- Range slider -->
     <div class="row mt-2 mb-2">
       <div class="col-md-6">
@@ -164,6 +198,9 @@ function loadDishes() {
   if (ordering) params.set('ordering', ordering);
   params.set('price_min', 0);
   params.set('price_max', priceMax);
+  const diets = Array.from(document.querySelectorAll('input[id^="diet-"]:checked'))
+  .map(cb => cb.value);
+  if (diets.length > 0) params.set('diet', diets.join(','));
 
   fetch('/menu/ajax/?' + params.toString())
     .then(r => r.json())
@@ -209,6 +246,10 @@ document.querySelectorAll('.cat-child').forEach(function(item) {
     const dropdown = this.querySelector('.cat-dropdown-2');
     if (dropdown) dropdown.style.display = 'none';
   });
+});
+
+document.querySelectorAll('input[id^="diet-"]').forEach(function(cb) {
+  cb.addEventListener('change', loadDishes);
 });
 
 function filterCategory(categoryId) {
