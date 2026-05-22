@@ -6,9 +6,6 @@
 {% block content %}
 
 <div class="page-title dark-background" style="background-image: url({% static 'frontend/img/page-title-bg.webp' %});">
-  <div class="container position-relative">
-    <h1>{{ dish.name }}</h1>
-  </div>
 </div>
 
 <section class="menu section">
@@ -64,30 +61,53 @@
         {% endif %}
 
         {% if dish.addon_groups.all %}
-        <div class="mb-4">
-          <h5 style="color:#fff;">Додатки:</h5>
-          {% for group in dish.addon_groups.all %}
-          <div class="mb-3">
-            <h6 style="color:#cda45e;">{{ group.category.name }}</h6>
-            <div class="d-flex flex-wrap gap-2">
-              {% for addon in group.category.addon_set.all %}
-              <div class="addon-card p-2 rounded text-center"
+    <div class="mb-4">
+      <h5 style="color:#fff;">Додатки:</h5>
+      {% for group in dish.addon_groups.all %}
+      <div class="mb-3">
+        <h6 style="color:#cda45e;">{{ group.category.name }}</h6>
+
+        <div class="d-flex flex-wrap gap-2">
+          {% for addon in group.category.addon_set.all %}
+          <div class="addon-card p-2 rounded text-center"
+               data-price="{{ addon.price }}"
+               data-selected="false"
+               onclick="toggleAddon(this)"
+               style="cursor:pointer; border:1px solid #333; background:#1a1a1a; color:#fff; width:100px;">
+            {% if addon.image %}
+            <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
+            {% endif %}
+            <div>{{ addon.name }}</div>
+            <small style="color:#cda45e;">+{{ addon.price }} грн</small>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% for child_cat in group.category.get_children %}
+        <div class="mt-2">
+          <h6 style="color:#cda45e;">{{ child_cat.name }}</h6>
+          <div class="d-flex flex-wrap gap-2 mt-1">
+            {% for addon in child_cat.addon_set.all %}
+            <div class="addon-card p-2 rounded text-center"
                  data-price="{{ addon.price }}"
                  data-selected="false"
                  onclick="toggleAddon(this)"
                  style="cursor:pointer; border:1px solid #333; background:#1a1a1a; color:#fff; width:100px;">
-                {% if addon.image %}
-                <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
-                {% endif %}
-                <div>{{ addon.name }}</div>
-                <small style="color:#cda45e;">+{{ addon.price }} грн</small>
-              </div>
-              {% endfor %}
+              {% if addon.image %}
+              <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
+              {% endif %}
+              <div>{{ addon.name }}</div>
+              <small style="color:#cda45e;">+{{ addon.price }} грн</small>
             </div>
+            {% endfor %}
           </div>
-          {% endfor %}
         </div>
-        {% endif %}
+        {% endfor %}
+
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
         <a href="{% url 'menu' %}" class="btn" style="background:#cda45e; color:#000;">← Назад до меню</a>
       </div>
