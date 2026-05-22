@@ -69,112 +69,131 @@
     </div>
 
     <!-- Пошук і сортування -->
-    <div class="row mt-3 mb-2">
-      <div class="col-md-5">
+    <!-- Пошук -->
+    <div class="row mt-3 mb-3">
+      <div class="col-md-6 mx-auto">
         <input type="text" id="search-input" class="form-control"
                placeholder="Пошук страви..." value="{{ search }}"
-               style="background:#1a1a1a; color:#cda45e; border-color:#cda45e;">
+               style="background:#1a1a1a; color:#cda45e !important;
+               border-color:#cda45e; caret-color:#cda45e;">
       </div>
     </div>
-      <!-- Сортування -->
-    <div class="row mt-3 mb-2">
-      <div class="col-12">
-        <label style="color:#cda45e; margin-bottom:10px; display:block;">Сортування:</label>
-        <div class="d-flex flex-wrap gap-4">
 
-          <div>
-            <span style="color:#aaa; font-size:0.9rem; display:block; margin-bottom:6px;">За ціною:</span>
-            <div class="d-flex gap-3">
-              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+    <div class="row">
+
+      <div class="col-lg-3 col-md-4 mb-4">
+        <div style="background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:20px; position:sticky; top:80px;">
+
+          <div style="color:#cda45e; font-size:1rem; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+            <i class="bi bi-sliders"></i> Фільтри
+          </div>
+
+          <!-- Сортування за ціною -->
+          <div style="margin-bottom:16px;">
+            <div style="color:#aaa; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Сортування за ціною</div>
+            <div class="d-flex flex-column gap-2">
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
                 <input type="radio" name="sort-price" id="sort-price-asc" value="base_price"
-                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       style="accent-color:#cda45e; width:15px; height:15px;"
                        {% if 'base_price' in ordering and '-base_price' not in ordering %}checked{% endif %}>
                 Ціна ↑
               </label>
-              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
                 <input type="radio" name="sort-price" id="sort-price-desc" value="-base_price"
-                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       style="accent-color:#cda45e; width:15px; height:15px;"
                        {% if '-base_price' in ordering %}checked{% endif %}>
                 Ціна ↓
               </label>
             </div>
           </div>
 
-          <div>
-            <span style="color:#aaa; font-size:0.9rem; display:block; margin-bottom:6px;">За назвою:</span>
-            <div class="d-flex gap-3">
-              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <div style="border-top:1px solid #333; margin-bottom:16px;"></div>
+
+          <!-- Сортування за назвою -->
+          <div style="margin-bottom:16px;">
+            <div style="color:#aaa; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Сортування за назвою</div>
+            <div class="d-flex flex-column gap-2">
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
                 <input type="radio" name="sort-name" id="sort-name-asc" value="name"
-                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       style="accent-color:#cda45e; width:15px; height:15px;"
                        {% if ',name' in ordering or ordering == 'name' %}checked{% endif %}>
                 А-Я
               </label>
-              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
                 <input type="radio" name="sort-name" id="sort-name-desc" value="-name"
-                       style="accent-color:#cda45e; width:16px; height:16px;"
+                       style="accent-color:#cda45e; width:15px; height:15px;"
                        {% if ordering == '-name' %}checked{% endif %}>
                 Я-А
               </label>
             </div>
           </div>
 
+          <div style="border-top:1px solid #333; margin-bottom:16px;"></div>
+
+          <!-- Дієтичні вподобання -->
+          <div style="margin-bottom:16px;">
+            <div style="color:#aaa; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Дієтичні вподобання</div>
+            <div class="d-flex flex-column gap-2">
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="diet-vegan" value="vegan"
+                       style="accent-color:#cda45e; width:15px; height:15px;">
+                Веганське
+              </label>
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="diet-vegetarian" value="vegetarian"
+                       style="accent-color:#cda45e; width:15px; height:15px;">
+                Вегетаріанське
+              </label>
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="diet-gluten-free" value="gluten_free"
+                       style="accent-color:#cda45e; width:15px; height:15px;">
+                Без глютену
+              </label>
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="diet-lactose-free" value="lactose_free"
+                       style="accent-color:#cda45e; width:15px; height:15px;">
+                Без лактози
+              </label>
+              <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="diet-nut-free" value="nut_free"
+                       style="accent-color:#cda45e; width:15px; height:15px;">
+                Без горіхів
+              </label>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid #333; margin-bottom:16px;"></div>
+
+          <!-- Ціна -->
+          <div>
+            <div style="color:#cda45e; font-size:0.9rem; margin-bottom:6px;">
+              Ціна до: <span id="price-label">{{ price_max }}</span> грн
+            </div>
+            <input type="range" id="price-range" min="0" max="1000"
+                   value="{{ price_max }}"
+                   class="form-range" style="accent-color:#cda45e;">
+          </div>
+
         </div>
       </div>
-    </div>
 
-  <!-- Фільтри по дієтах -->
-    <div class="row mt-3 mb-2">
-      <div class="col-12">
-        <label style="color:#cda45e; margin-bottom:10px; display:block;">Дієтичні вподобання:</label>
-        <div class="d-flex flex-wrap gap-3">
-          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="diet-vegan" value="vegan"
-                   style="accent-color:#cda45e; width:16px; height:16px;">
-            Веганське
-          </label>
-          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="diet-vegetarian" value="vegetarian"
-                   style="accent-color:#cda45e; width:16px; height:16px;">
-            Вегетаріанське
-          </label>
-          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="diet-gluten-free" value="gluten_free"
-                   style="accent-color:#cda45e; width:16px; height:16px;">
-            Без глютену
-          </label>
-          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="diet-lactose-free" value="lactose_free"
-                   style="accent-color:#cda45e; width:16px; height:16px;">
-            Без лактози
-          </label>
-          <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="diet-nut-free" value="nut_free"
-                   style="accent-color:#cda45e; width:16px; height:16px;">
-            Без горіхів
-          </label>
+      <!-- Список страв -->
+      <div class="col-lg-9 col-md-8">
+        <div class="row" id="dish-list">
+          {% include 'frontend/partials/dish_list.html' %}
         </div>
       </div>
-    </div>
 
-    <!-- Range slider -->
-    <div class="row mt-2 mb-2">
-      <div class="col-md-6">
-        <label style="color:#cda45e; margin-bottom:5px;">
-          Ціна до: <span id="price-label">{{ price_max }}</span> грн
-        </label>
-        <input type="range" id="price-range" min="0" max="1000"
-               value="{{ price_max }}"
-               class="form-range" style="accent-color:#cda45e;">
-      </div>
     </div>
-
-    <!-- Список страв -->
-    <div class="row" id="dish-list">
-      {% include 'frontend/partials/dish_list.html' %}
-    </div>
-
   </div>
 </section>
+
+<style>
+#search-input::placeholder {
+  color: #cda45e;
+  opacity: 0.6;
+}
+</style>
 
 <script>
 document.getElementById('price-range').addEventListener('input', function() {
