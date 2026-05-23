@@ -13,11 +13,11 @@
   <link href="{% static 'frontend/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
   <link href="{% static 'frontend/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
   <link href="{% static 'frontend/css/main.css' %}" rel="stylesheet">
+
 </head>
 <body class="index-page">
 
 <header id="header" class="header fixed-top">
-
   <div class="topbar d-flex align-items-center">
     <div class="container d-flex justify-content-center justify-content-md-between">
       <div class="contact-info d-flex align-items-center">
@@ -25,9 +25,7 @@
         <i class="bi bi-phone d-flex align-items-center ms-4"><span>+38 097 777 77 77</span></i>
       </div>
       <div class="languages d-none d-md-flex align-items-center">
-        <ul>
-          <li>Uk</li>
-        </ul>
+        <ul><li>Uk</li></ul>
       </div>
     </div>
   </div>
@@ -44,11 +42,93 @@
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
-      <a class="btn-book-a-table d-none d-xl-block" href="{% url 'menu' %}">Зробити замовлення</a>
+
+      <div class="d-none d-xl-flex align-items-center gap-3 ms-3">
+        <!-- Кошик -->
+        <button class="cart-icon-btn" onclick="openCart()" aria-label="Кошик">
+          <i class="bi bi-cart3"></i>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+        <!-- Не залогінений -->
+        <button id="btn-login" class="btn-auth" onclick="openAuthModal()">Увійти</button>
+        <!-- Залогінений -->
+        <div id="btn-user" style="display:none; align-items:center; gap:8px;">
+          <span id="user-name" style="color:var(--accent-color); font-size:14px; font-family:var(--nav-font);"></span>
+          <button class="btn-auth" onclick="logout()">Вийти</button>
+        </div>
+      </div>
+
     </div>
   </div>
-
 </header>
+
+<!-- Overlay -->
+<div id="cart-overlay" onclick="handleOverlayClick()"></div>
+
+<!-- Панель кошика -->
+<div id="cart-panel">
+  <div class="cart-panel-header">
+    <div class="cart-panel-title"><i class="bi bi-cart3"></i> Кошик</div>
+    <button class="cart-close-btn" onclick="closeCart()" aria-label="Закрити">×</button>
+  </div>
+  <div id="cart-items-container">
+    <div class="cart-empty">Кошик порожній</div>
+  </div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Разом:</span>
+      <span class="cart-total-val" id="cart-total">0.00 грн</span>
+    </div>
+    <button class="cart-checkout-btn" onclick="goCheckout()">Оформити замовлення</button>
+  </div>
+</div>
+
+<!-- Auth Modal Overlay -->
+<div id="auth-overlay" onclick="closeAuthModal()"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000;"></div>
+
+<!-- Auth Modal -->
+<div id="auth-modal">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="display:flex; gap:16px;">
+      <button class="auth-tab-btn active" id="tab-login" onclick="switchTab('login')">Вхід</button>
+      <button class="auth-tab-btn inactive" id="tab-register" onclick="switchTab('register')">Реєстрація</button>
+    </div>
+    <button class="cart-close-btn" onclick="closeAuthModal()">×</button>
+  </div>
+
+  <div class="auth-error" id="auth-error"></div>
+
+  <!-- Форма входу -->
+  <div id="form-login">
+    <div style="margin-bottom:12px;">
+      <label class="auth-label">Логін</label>
+      <input id="login-username" type="text" class="auth-input" placeholder="Введіть логін">
+    </div>
+    <div style="margin-bottom:18px;">
+      <label class="auth-label">Пароль</label>
+      <input id="login-password" type="password" class="auth-input" placeholder="Введіть пароль">
+    </div>
+    <button class="auth-submit-btn" onclick="doLogin()">Увійти</button>
+  </div>
+
+  <!-- Форма реєстрації -->
+  <div id="form-register" style="display:none;">
+    <div style="margin-bottom:12px;">
+      <label class="auth-label">Логін</label>
+      <input id="reg-username" type="text" class="auth-input" placeholder="Введіть логін">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label class="auth-label">Email</label>
+      <input id="reg-email" type="email" class="auth-input" placeholder="Введіть email">
+    </div>
+    <div style="margin-bottom:18px;">
+      <label class="auth-label">Пароль</label>
+      <input id="reg-password" type="password" class="auth-input" placeholder="Введіть пароль">
+    </div>
+    <button class="auth-submit-btn" onclick="doRegister()">Зареєструватись</button>
+  </div>
+</div>
 
 <main class="main">
   {% block content %}{% endblock %}
@@ -98,5 +178,197 @@
 <script src="{% static 'frontend/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
 <script src="{% static 'frontend/vendor/swiper/swiper-bundle.min.js' %}"></script>
 <script src="{% static 'frontend/js/main.js' %}"></script>
+
+<script>
+// ====== AUTH ======
+function openAuthModal() {
+  document.getElementById('auth-modal').style.display = 'block';
+  document.getElementById('auth-overlay').style.display = 'block';
+  document.getElementById('auth-error').style.display = 'none';
+}
+function closeAuthModal() {
+  document.getElementById('auth-modal').style.display = 'none';
+  document.getElementById('auth-overlay').style.display = 'none';
+}
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('form-login').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('form-register').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tab-login').className = 'auth-tab-btn ' + (isLogin ? 'active' : 'inactive');
+  document.getElementById('tab-register').className = 'auth-tab-btn ' + (isLogin ? 'inactive' : 'active');
+  document.getElementById('auth-error').style.display = 'none';
+}
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!username || !password) { showAuthError('Заповніть всі поля'); return; }
+  fetch('/api/users/login/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.access) {
+      localStorage.setItem('access', data.access);
+      localStorage.setItem('refresh', data.refresh);
+      localStorage.setItem('username', data.user.username);
+      updateAuthUI();
+      closeAuthModal();
+      loadCart();
+    } else {
+      showAuthError('Невірний логін або пароль');
+    }
+  });
+}
+function doRegister() {
+  const username = document.getElementById('reg-username').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!username || !email || !password) { showAuthError('Заповніть всі поля'); return; }
+  fetch('/api/users/register/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, email, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.access) {
+      localStorage.setItem('access', data.access);
+      localStorage.setItem('refresh', data.refresh);
+      localStorage.setItem('username', data.user.username);
+      updateAuthUI();
+      closeAuthModal();
+      loadCart();
+    } else {
+      const msg = data.username?.[0] || data.email?.[0] || data.password?.[0] || 'Помилка реєстрації';
+      showAuthError(msg);
+    }
+  });
+}
+function logout() {
+  localStorage.removeItem('access');
+  localStorage.removeItem('refresh');
+  localStorage.removeItem('username');
+  updateAuthUI();
+  document.getElementById('cart-items-container').innerHTML = '<div class="cart-empty">Кошик порожній</div>';
+  document.getElementById('cart-footer').style.display = 'none';
+  document.getElementById('cart-count').style.display = 'none';
+}
+function updateAuthUI() {
+  const username = localStorage.getItem('username');
+  if (username) {
+    document.getElementById('btn-login').style.display = 'none';
+    document.getElementById('btn-user').style.display = 'flex';
+    document.getElementById('user-name').textContent = username;
+  } else {
+    document.getElementById('btn-login').style.display = 'block';
+    document.getElementById('btn-user').style.display = 'none';
+  }
+}
+
+// ====== CART ======
+function getAuthHeaders() {
+  const token = localStorage.getItem('access');
+  return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
+function handleOverlayClick() {
+  closeCart();
+  closeAuthModal();
+}
+function openCart() {
+  if (!localStorage.getItem('access')) { openAuthModal(); return; }
+  document.getElementById('cart-panel').classList.add('open');
+  document.getElementById('cart-overlay').style.display = 'block';
+  loadCart();
+}
+function closeCart() {
+  document.getElementById('cart-panel').classList.remove('open');
+  document.getElementById('cart-overlay').style.display = 'none';
+}
+function loadCart() {
+  const token = localStorage.getItem('access');
+  if (!token) return;
+  fetch('/api/orders/cart/', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(r => r.json())
+  .then(data => renderCart(data))
+  .catch(() => {});
+}
+function renderCart(data) {
+  const container = document.getElementById('cart-items-container');
+  const footer = document.getElementById('cart-footer');
+  const items = data.items || [];
+  if (items.length === 0) {
+    container.innerHTML = '<div class="cart-empty">Кошик порожній</div>';
+    footer.style.display = 'none';
+    document.getElementById('cart-count').style.display = 'none';
+    return;
+  }
+  const badge = document.getElementById('cart-count');
+  badge.textContent = items.length;
+  badge.style.display = 'flex';
+  let html = '';
+  items.forEach(item => {
+    const price = parseFloat(item.total_price || 0);
+    let tagsHtml = '';
+    (item.removed_ingredients || []).forEach(r => {
+      tagsHtml += `<span class="cart-tag cart-tag-removed">− ${r.name}</span>`;
+    });
+    (item.addons || []).forEach(a => {
+      tagsHtml += `<span class="cart-tag cart-tag-addon">+ ${a.addon?.name || ''}</span>`;
+    });
+    html += `
+      <div class="cart-item-card">
+        <div class="no-img"></div>
+        <div style="flex:1;">
+          <div class="cart-item-name">${item.dish_name}</div>
+          <div class="cart-item-tags">${tagsHtml}</div>
+          <div class="cart-qty-row">
+            <button class="cart-qty-btn" onclick="updateQty(${item.id}, ${item.quantity - 1})">−</button>
+            <span class="cart-qty-val">${item.quantity}</span>
+            <button class="cart-qty-btn" onclick="updateQty(${item.id}, ${item.quantity + 1})">+</button>
+          </div>
+        </div>
+        <div class="cart-item-right">
+          <span class="cart-item-price">${price.toFixed(2)} грн</span>
+          <button class="cart-delete-btn" onclick="deleteItem(${item.id})" aria-label="Видалити">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>`;
+  });
+  container.innerHTML = html;
+  document.getElementById('cart-total').textContent = parseFloat(data.cart_total_price || 0).toFixed(2) + ' грн';
+  footer.style.display = 'block';
+}
+function updateQty(itemId, newQty) {
+  if (newQty < 1) { deleteItem(itemId); return; }
+  fetch(`/api/orders/cart/items/${itemId}/`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ quantity: newQty })
+  }).then(() => loadCart());
+}
+function deleteItem(itemId) {
+  fetch(`/api/orders/cart/items/${itemId}/`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  }).then(() => loadCart());
+}
+function goCheckout() {
+  window.location.href = '/checkout/';
+}
+
+updateAuthUI();
+if (localStorage.getItem('access')) loadCart();
+</script>
+
 </body>
 </html>
