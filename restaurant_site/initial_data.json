@@ -306,7 +306,12 @@
       "name": "Філе міньйон з абердин-ангуса",
       "category": 6,
       "base_price": "850.00",
-      "is_active": true
+      "is_active": true,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "is_lactose_free": true,
+      "is_nut_free": true
     }
   },
   {
@@ -316,7 +321,12 @@
       "name": "Тартар із блакитного тунця",
       "category": 3,
       "base_price": "420.00",
-      "is_active": true
+      "is_active": true,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "is_lactose_free": true,
+      "is_nut_free": true
     }
   },
   {
@@ -326,17 +336,27 @@
       "name": "Цитрусовий лимонад",
       "category": 9,
       "base_price": "65.00",
-      "is_active": true
+      "is_active": true,
+      "is_vegan": true,
+      "is_vegetarian": true,
+      "is_gluten_free": true,
+      "is_lactose_free": true,
+      "is_nut_free": true
     }
   },
   {
     "model": "menu.dish",
     "pk": 4,
     "fields": {
-      "name": "Тестовий стейк із тунця",
+      "name": "Стейк із тунця",
       "category": 3,
       "base_price": "550.00",
-      "is_active": true
+      "is_active": true,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "is_lactose_free": true,
+      "is_nut_free": true
     }
   },
   {
@@ -346,7 +366,12 @@
       "name": "Салат Капрезе з моцарелою",
       "category": 2,
       "base_price": "280.00",
-      "is_active": true
+      "is_active": true,
+      "is_vegan": false,
+      "is_vegetarian": true,
+      "is_gluten_free": false,
+      "is_lactose_free": false,
+      "is_nut_free": true
     }
   },
   {
@@ -356,7 +381,12 @@
       "name": "Теплий салат із телятиною та томатами",
       "category": 2,
       "base_price": "340.00",
-      "is_active": true
+      "is_active": true,
+      "is_vegan": false,
+      "is_vegetarian": false,
+      "is_gluten_free": true,
+      "is_lactose_free": true,
+      "is_nut_free": true
     }
   },
   {
@@ -426,6 +456,26 @@
     }
   },
   {
+    "model": "menu.dishaddongroup",
+    "pk": 13,
+    "fields": {
+      "dish": 4,
+      "category": 2,
+      "is_required": false,
+      "max_choices": 1
+    }
+  },
+  {
+    "model": "menu.dishaddongroup",
+    "pk": 14,
+    "fields": {
+      "dish": 4,
+      "category": 6,
+      "is_required": false,
+      "max_choices": 2
+    }
+  },
+  {
     "model": "menu.dishimage",
     "pk": 1,
     "fields": {
@@ -462,6 +512,33 @@
     }
   },
   {
+    "model": "menu.dishimage",
+    "pk": 5,
+    "fields": {
+      "dish": 4,
+      "image": "dishes/tuna_steak.jpg",
+      "is_main": true
+    }
+  },
+  {
+    "model": "menu.dishimage",
+    "pk": 6,
+    "fields": {
+      "dish": 5,
+      "image": "dishes/caprese_salad.jpg",
+      "is_main": true
+    }
+  },
+  {
+    "model": "menu.dishimage",
+    "pk": 7,
+    "fields": {
+      "dish": 6,
+      "image": "dishes/warm_beef_salad.jpg",
+      "is_main": true
+    }
+  },
+  {
     "model": "menu.ingredientgroup",
     "pk": 1,
     "fields": {
@@ -486,9 +563,9 @@
     "pk": 3,
     "fields": {
       "dish": 4,
-      "name": "Опції тунця",
+      "name": "Степінь прожарки тунця",
       "is_required": true,
-      "max_choices": 2
+      "max_choices": 1
     }
   },
   {
@@ -749,26 +826,6 @@
   },
   {
     "model": "menu.ingredientoption",
-    "pk": 8,
-    "fields": {
-      "group": 3,
-      "ingredient": 1,
-      "price_delta": "0.00",
-      "is_default": true
-    }
-  },
-  {
-    "model": "menu.ingredientoption",
-    "pk": 9,
-    "fields": {
-      "group": 3,
-      "ingredient": 6,
-      "price_delta": "0.00",
-      "is_default": false
-    }
-  },
-  {
-    "model": "menu.ingredientoption",
     "pk": 10,
     "fields": {
       "group": 4,
@@ -834,6 +891,56 @@
       "group": 6,
       "ingredient": 12,
       "price_delta": "40.00",
+      "is_default": false
+    }
+  },
+  {
+    "model": "menu.ingredientoption",
+    "pk": 17,
+    "fields": {
+      "group": 3,
+      "ingredient": 1,
+      "price_delta": "0.00",
+      "is_default": true
+    }
+  },
+  {
+    "model": "menu.ingredientoption",
+    "pk": 18,
+    "fields": {
+      "group": 3,
+      "ingredient": 2,
+      "price_delta": "0.00",
+      "is_default": false
+    }
+  },
+  {
+    "model": "menu.ingredientoption",
+    "pk": 19,
+    "fields": {
+      "group": 3,
+      "ingredient": 3,
+      "price_delta": "0.00",
+      "is_default": false
+    }
+  },
+  {
+    "model": "menu.ingredientoption",
+    "pk": 20,
+    "fields": {
+      "group": 3,
+      "ingredient": 4,
+      "price_delta": "0.00",
+      "is_default": false
+    }
+  },
+  {
+    "model": "menu.ingredientoption",
+    "pk": 21,
+    "fields": {
+      "group": 3,
+      "ingredient": 5,
+      "price_delta": "0.00",
       "is_default": false
     }
   }
