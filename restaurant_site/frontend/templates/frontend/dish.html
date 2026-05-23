@@ -40,6 +40,8 @@
             <div class="d-flex flex-wrap gap-2 ingredient-group">
                 {% for option in group.options.all %}
               <div class="ingredient-card p-2 rounded text-center"
+                 data-id="{{ option.id }}"
+                 data-ingredient-id="{{ option.ingredient.id }}"
                  data-price="{{ option.price_delta }}"
                  data-selected="{% if option.is_default %}true{% else %}false{% endif %}"
                  onclick="toggleIngredient(this)"
@@ -61,53 +63,64 @@
         {% endif %}
 
         {% if dish.addon_groups.all %}
-    <div class="mb-4">
-      <h5 style="color:#fff;">Додатки:</h5>
-      {% for group in dish.addon_groups.all %}
-      <div class="mb-3">
-        <h6 style="color:#cda45e;">{{ group.category.name }}</h6>
+        <div class="mb-4">
+          <h5 style="color:#fff;">Додатки:</h5>
+          {% for group in dish.addon_groups.all %}
+          <div class="mb-3">
+            <h6 style="color:#cda45e;">{{ group.category.name }}</h6>
 
-        <div class="d-flex flex-wrap gap-2">
-          {% for addon in group.category.addon_set.all %}
-          <div class="addon-card p-2 rounded text-center"
-               data-price="{{ addon.price }}"
-               data-selected="false"
-               onclick="toggleAddon(this)"
-               style="cursor:pointer; border:1px solid #333; background:#1a1a1a; color:#fff; width:100px;">
-            {% if addon.image %}
-            <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
-            {% endif %}
-            <div>{{ addon.name }}</div>
-            <small style="color:#cda45e;">+{{ addon.price }} грн</small>
-          </div>
-          {% endfor %}
-        </div>
+            <div class="d-flex flex-wrap gap-2">
+              {% for addon in group.category.addon_set.all %}
+              <div class="addon-card p-2 rounded text-center"
+                   data-id="{{ addon.id }}"
+                   data-price="{{ addon.price }}"
+                   data-selected="false"
+                   onclick="toggleAddon(this)"
+                   style="cursor:pointer; border:1px solid #333; background:#1a1a1a; color:#fff; width:100px;">
+                {% if addon.image %}
+                <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
+                {% endif %}
+                <div>{{ addon.name }}</div>
+                <small style="color:#cda45e;">+{{ addon.price }} грн</small>
+              </div>
+              {% endfor %}
+            </div>
 
-        {% for child_cat in group.category.get_children %}
-        <div class="mt-2">
-          <h6 style="color:#cda45e;">{{ child_cat.name }}</h6>
-          <div class="d-flex flex-wrap gap-2 mt-1">
-            {% for addon in child_cat.addon_set.all %}
-            <div class="addon-card p-2 rounded text-center"
-                 data-price="{{ addon.price }}"
-                 data-selected="false"
-                 onclick="toggleAddon(this)"
-                 style="cursor:pointer; border:1px solid #333; background:#1a1a1a; color:#fff; width:100px;">
-              {% if addon.image %}
-              <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
-              {% endif %}
-              <div>{{ addon.name }}</div>
-              <small style="color:#cda45e;">+{{ addon.price }} грн</small>
+            {% for child_cat in group.category.get_children %}
+            <div class="mt-2">
+              <h6 style="color:#cda45e;">{{ child_cat.name }}</h6>
+              <div class="d-flex flex-wrap gap-2 mt-1">
+                {% for addon in child_cat.addon_set.all %}
+                <div class="addon-card p-2 rounded text-center"
+                     data-id="{{ addon.id }}"
+                     data-price="{{ addon.price }}"
+                     data-selected="false"
+                     onclick="toggleAddon(this)"
+                     style="cursor:pointer; border:1px solid #333; background:#1a1a1a; color:#fff; width:100px;">
+                  {% if addon.image %}
+                  <img src="/media/{{ addon.image }}" style="width:60px; height:60px; object-fit:cover; border-radius:50%; margin-bottom:5px;">
+                  {% endif %}
+                  <div>{{ addon.name }}</div>
+                  <small style="color:#cda45e;">+{{ addon.price }} грн</small>
+                </div>
+                {% endfor %}
+              </div>
             </div>
             {% endfor %}
-          </div>
-        </div>
-        {% endfor %}
 
-      </div>
+          </div>
       {% endfor %}
     </div>
     {% endif %}
+
+      <button onclick="addToCart()" class="btn me-2"
+            style="background:transparent; border:2px solid #cda45e; color:#fff;
+                   border-radius:50px; padding:8px 28px; font-size:14px;
+                   text-transform:uppercase; transition:0.3s;"
+            onmouseover="this.style.background='#cda45e'"
+            onmouseout="this.style.background='transparent'">
+      Додати в кошик
+    </button>
 
         <a href="{% url 'menu' %}" class="btn" style="background:#cda45e; color:#000;">← Назад до меню</a>
       </div>
@@ -118,10 +131,16 @@
 
 <script>
 const basePrice = {{ dish.base_price }};
+const dishId = {{ dish.id }};
 
 function updatePrice() {
   let total = basePrice;
-  document.querySelectorAll('.ingredient-card, .addon-card').forEach(card => {
+  document.querySelectorAll('.ingredient-card').forEach(card => {
+    if (card.dataset.selected === 'true') {
+      total += parseFloat(card.dataset.price || 0);
+    }
+  });
+  document.querySelectorAll('.addon-card').forEach(card => {
     if (card.dataset.selected === 'true') {
       total += parseFloat(card.dataset.price || 0);
     }
@@ -147,6 +166,69 @@ function toggleAddon(el) {
   el.style.border = el.dataset.selected === 'true' ? '1px solid #cda45e' : '1px solid #333';
   el.style.background = el.dataset.selected === 'true' ? '#2a2a1a' : '#1a1a1a';
   updatePrice();
+}
+
+function addToCart() {
+  const token = localStorage.getItem('access');
+  if (!token) {
+    openAuthModal();
+    return;
+  }
+
+  const ingredientIds = [];
+  document.querySelectorAll('.ingredient-card').forEach(card => {
+    if (card.dataset.selected === 'true') {
+      ingredientIds.push(parseInt(card.dataset.id));
+    }
+  });
+
+  const addonIds = [];
+  document.querySelectorAll('.addon-card').forEach(card => {
+    if (card.dataset.selected === 'true') {
+      addonIds.push(parseInt(card.dataset.id));
+    }
+  });
+
+  const payload = {
+    dish_id: dishId,
+    quantity: 1,
+    ingredients: ingredientIds,
+    addons: addonIds,
+    removed_ingredients: [],
+    added_ingredients: [],
+  };
+
+  fetch('/api/orders/cart/items/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.id) {
+      showCartNotification('Страву додано до кошика!');
+      loadCart();
+    } else {
+      const msg = data.detail || JSON.stringify(data);
+      alert('Помилка: ' + msg);
+    }
+  });
+}
+
+function showCartNotification(msg) {
+  let el = document.getElementById('cart-notification');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'cart-notification';
+    el.style.cssText = 'position:fixed; bottom:24px; right:24px; background:#cda45e; color:#000; padding:12px 24px; border-radius:6px; font-weight:600; z-index:99999; transition:opacity 0.3s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2500);
 }
 </script>
 
