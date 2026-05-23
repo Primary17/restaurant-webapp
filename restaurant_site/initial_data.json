@@ -84,6 +84,18 @@
     }
   },
   {
+    "model": "menu.addoncategory",
+    "pk": 8,
+    "fields": {
+      "name": "Соуси",
+      "parent": null,
+      "lft": 1,
+      "rght": 2,
+      "tree_id": 5,
+      "level": 0
+    }
+  },
+  {
     "model": "menu.addon",
     "pk": 1,
     "fields": {
@@ -178,7 +190,8 @@
     "pk": 10,
     "fields": {
       "name": "Сирний соус",
-      "category": 6,
+      "image": "addons/cheese_sauce.jpg",
+      "category": 8,
       "price": "20.00"
     }
   },
@@ -187,7 +200,8 @@
     "pk": 11,
     "fields": {
       "name": "Соус Барбекю",
-      "category": 6,
+      "image": "addons/barbecue_sauce.jpg",
+      "category": 8,
       "price": "20.00"
     }
   },
@@ -470,7 +484,17 @@
     "pk": 14,
     "fields": {
       "dish": 4,
-      "category": 6,
+      "category": 8,
+      "is_required": false,
+      "max_choices": 2
+    }
+  },
+  {
+    "model": "menu.dishaddongroup",
+    "pk": 15,
+    "fields": {
+      "dish": 1,
+      "category": 8,
       "is_required": false,
       "max_choices": 2
     }
