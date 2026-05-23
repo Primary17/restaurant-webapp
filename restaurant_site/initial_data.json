@@ -694,7 +694,7 @@
     "pk": 8,
     "fields": {
       "name": "Сир Моцарела",
-      "image": "",
+      "image": "addons/mozzarella.jpg",
       "is_vegan": false,
       "is_vegetarian": true,
       "is_gluten_free": true,
