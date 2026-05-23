@@ -1,0 +1,269 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Оформлення замовлення{% endblock %}
+
+{% block content %}
+
+<div class="page-title dark-background" style="background-image: url({% static 'frontend/img/page-title-bg.webp' %}); min-height:200px;">
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Замовлення</h2>
+      <p>Оформлення замовлення</p>
+    </div>
+
+    <div class="row gy-4">
+
+      <div class="col-lg-7">
+        <div style="background:var(--surface-color); border-radius:8px; padding:28px;">
+
+          <div id="checkout-error" style="display:none; background:#df1529; color:#fff;
+               padding:10px 15px; font-size:0.85rem; font-weight:600; margin-bottom:16px;"></div>
+
+          <div style="margin-bottom:20px;">
+            <label style="color:var(--accent-color); font-size:0.8rem; text-transform:uppercase;
+                          letter-spacing:0.05em; display:block; margin-bottom:10px;">
+              Тип доставки
+            </label>
+            <div class="d-flex gap-3">
+              <label style="color:var(--default-color); cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <input type="radio" name="delivery-type" value="delivery" checked
+                       id="type-delivery"
+                       style="accent-color:var(--accent-color); width:16px; height:16px;"
+                       onchange="toggleDelivery()">
+                Доставка
+              </label>
+              <label style="color:var(--default-color); cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <input type="radio" name="delivery-type" value="pickup"
+                       id="type-pickup"
+                       style="accent-color:var(--accent-color); width:16px; height:16px;"
+                       onchange="toggleDelivery()">
+                Самовивіз
+              </label>
+            </div>
+          </div>
+
+          <div id="address-block" style="margin-bottom:16px;">
+            <label style="color:var(--accent-color); font-size:0.8rem; text-transform:uppercase;
+                          letter-spacing:0.05em; display:block; margin-bottom:6px;">
+              Адреса доставки *
+            </label>
+            <input type="text" id="checkout-address" class="auth-input"
+                   placeholder="вул. Хрещатик, 1, кв. 5">
+          </div>
+
+          <div style="margin-bottom:24px;">
+            <label style="color:var(--accent-color); font-size:0.8rem; text-transform:uppercase;
+                          letter-spacing:0.05em; display:block; margin-bottom:6px;">
+              Коментар до замовлення
+            </label>
+            <textarea id="checkout-comment" class="auth-input"
+                      placeholder="Побажання, алергії, час доставки..."
+                      rows="3" style="resize:vertical;"></textarea>
+          </div>
+
+          <button onclick="submitCheckout()" class="cart-checkout-btn">
+            Підтвердити замовлення
+          </button>
+
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div style="background:var(--surface-color); border-radius:8px; padding:28px;">
+          <h5 style="color:var(--accent-color); font-family:var(--heading-font);
+                     margin-bottom:16px;">Ваше замовлення</h5>
+
+          <div id="checkout-items">
+            <div style="color:var(--default-color); text-align:center; padding:20px 0;">
+              Завантаження...
+            </div>
+          </div>
+
+          <div style="border-top:1px solid color-mix(in srgb, var(--default-color), transparent 85%);
+                      margin-top:16px; padding-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;
+                        margin-bottom:8px;">
+              <span style="color:var(--default-color); font-size:0.9rem;">Сума замовлення:</span>
+              <span style="color:var(--accent-color); font-weight:600;" id="checkout-items-total">0.00 грн</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;
+                        margin-bottom:8px;" id="delivery-fee-row">
+              <span style="color:var(--default-color); font-size:0.9rem;">Доставка:</span>
+              <span style="color:var(--accent-color); font-weight:600;" id="checkout-delivery-fee">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;
+                        margin-top:12px; padding-top:12px;
+                        border-top:1px solid color-mix(in srgb, var(--default-color), transparent 85%);">
+              <span style="color:var(--heading-color); font-size:1rem; font-weight:600;">Разом:</span>
+              <span style="color:var(--accent-color); font-size:1.2rem; font-weight:700;
+                           font-family:var(--heading-font);" id="checkout-total">0.00 грн</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const token = localStorage.getItem('access');
+  if (!token) {
+    window.location.href = '/menu/';
+    return;
+  }
+  loadCheckoutCart();
+});
+
+function toggleDelivery() {
+  const isDelivery = document.getElementById('type-delivery').checked;
+  document.getElementById('address-block').style.display = isDelivery ? 'block' : 'none';
+  document.getElementById('delivery-fee-row').style.display = isDelivery ? 'flex' : 'none';
+}
+
+function loadCheckoutCart() {
+  const token = localStorage.getItem('access');
+  fetch('/api/orders/cart/', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(r => r.json())
+  .then(data => renderCheckoutItems(data))
+  .catch(() => {});
+}
+
+function renderCheckoutItems(data) {
+  const container = document.getElementById('checkout-items');
+  const items = data.items || [];
+
+  if (items.length === 0) {
+    container.innerHTML = '<div style="color:var(--default-color); text-align:center; padding:20px 0;">Кошик порожній</div>';
+    return;
+  }
+
+  let html = '';
+  items.forEach(item => {
+    const price = parseFloat(item.total_price || 0);
+
+    let tagsHtml = '';
+    (item.removed_ingredients || []).forEach(r => {
+      tagsHtml += `<span class="cart-tag cart-tag-removed">− ${r.name}</span>`;
+    });
+    (item.addons || []).forEach(a => {
+      tagsHtml += `<span class="cart-tag cart-tag-addon">+ ${a.addon?.name || ''}</span>`;
+    });
+
+    html += `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;
+                  padding:10px 0; border-bottom:1px solid color-mix(in srgb, var(--default-color), transparent 85%);">
+        <div style="flex:1;">
+          <div style="color:var(--heading-color); font-size:0.9rem; font-weight:600;
+                      font-family:var(--heading-font); margin-bottom:3px;">
+            ${item.dish_name}
+            <span style="color:var(--default-color); font-weight:400; font-size:0.85rem;">
+              × ${item.quantity}
+            </span>
+          </div>
+          <div class="cart-item-tags">${tagsHtml}</div>
+        </div>
+        <div style="color:var(--accent-color); font-weight:600; font-size:0.9rem;
+                    white-space:nowrap; margin-left:12px;">
+          ${price.toFixed(2)} грн
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+
+  const total = parseFloat(data.cart_total_price || 0);
+  document.getElementById('checkout-items-total').textContent = total.toFixed(2) + ' грн';
+  document.getElementById('checkout-total').textContent = total.toFixed(2) + ' грн';
+  document.getElementById('checkout-delivery-fee').textContent = 'після підтвердження';
+}
+
+function submitCheckout() {
+  const token = localStorage.getItem('access');
+  if (!token) { window.location.href = '/menu/'; return; }
+
+  const isDelivery = document.getElementById('type-delivery').checked;
+  const address = document.getElementById('checkout-address').value.trim();
+  const comment = document.getElementById('checkout-comment').value.trim();
+
+  if (isDelivery && !address) {
+    showCheckoutError('Вкажіть адресу доставки');
+    return;
+  }
+
+  const payload = {
+    address: isDelivery ? address : 'Самовивіз',
+    comment: comment,
+  };
+
+  fetch('/api/orders/cart/checkout/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.id) {
+      showOrderSuccess(data.id);
+    } else {
+      showCheckoutError(data.detail || 'Помилка при оформленні замовлення');
+    }
+  });
+}
+
+function showCheckoutError(msg) {
+  const el = document.getElementById('checkout-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function showOrderSuccess(orderId) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; align-items:center; justify-content:center;';
+
+  overlay.innerHTML = `
+    <div style="background:var(--surface-color); border:1px solid color-mix(in srgb, var(--accent-color), transparent 60%);
+                border-radius:12px; padding:40px; max-width:420px; width:90%; text-align:center;">
+      <i class="bi bi-check-circle" style="font-size:3.5rem; color:var(--accent-color);"></i>
+      <h3 style="color:var(--heading-color); margin:16px 0 8px; font-family:var(--heading-font);">
+        Замовлення оформлено!
+      </h3>
+      <p style="color:var(--default-color); margin-bottom:6px;">
+        Номер вашого замовлення:
+      </p>
+      <p style="color:var(--accent-color); font-size:1.5rem; font-weight:700;
+                font-family:var(--heading-font); margin-bottom:24px;">
+        #${orderId}
+      </p>
+      <p style="color:var(--default-color); font-size:0.9rem; margin-bottom:24px;">
+        Дякуємо за замовлення! Ми зв'яжемось з вами найближчим часом.
+      </p>
+      <button onclick="returnToMenu()"
+              class="cart-checkout-btn" style="width:auto; padding:11px 40px;">
+        Повернутись до меню
+      </button>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+function returnToMenu() {
+  document.body.style.overflow = '';
+  window.location.href = '/menu/';
+}
+</script>
+
+{% endblock %}

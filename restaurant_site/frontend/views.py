@@ -138,3 +138,6 @@ def dish_detail(request, dish_id):
         'dish': dish,
         'all_ingredients': all_ingredients,
     })
+
+def checkout(request):
+    return render(request, 'frontend/checkout.html')
