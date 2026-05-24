@@ -230,7 +230,25 @@ function doRegister() {
   const username = document.getElementById('reg-username').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
-  if (!username || !email || !password) { showAuthError('Заповніть всі поля'); return; }
+
+  if (!username || !email || !password) {
+    showAuthError('Заповніть всі поля');
+    return;
+  }
+  if (username.length < 7) {
+    showAuthError('Логін має містити мінімум 7 символів');
+    return;
+  }
+  if (password.length < 8) {
+    showAuthError('Пароль має містити мінімум 8 символів');
+    return;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showAuthError('Введіть коректний email');
+    return;
+  }
+
   fetch('/api/users/register/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -317,6 +335,11 @@ function renderCart(data) {
   let html = '';
   items.forEach(item => {
     const price = parseFloat(item.total_price || 0);
+
+    const imgHtml = item.dish_image
+      ? `<img src="${item.dish_image}" alt="${item.dish_name}" style="width:56px; height:56px; border-radius:6px; object-fit:cover; flex-shrink:0;">`
+      : `<div class="no-img"></div>`;
+
     let tagsHtml = '';
     (item.removed_ingredients || []).forEach(r => {
       tagsHtml += `<span class="cart-tag cart-tag-removed">− ${r.name}</span>`;
@@ -326,7 +349,7 @@ function renderCart(data) {
     });
     html += `
       <div class="cart-item-card">
-        <div class="no-img"></div>
+        ${imgHtml}
         <div style="flex:1;">
           <div class="cart-item-name">${item.dish_name}</div>
           <div class="cart-item-tags">${tagsHtml}</div>
