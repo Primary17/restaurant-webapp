@@ -117,6 +117,7 @@ class CartItemRemovedIngredientSerializer(serializers.ModelSerializer):
 class CartItemReadSerializer(serializers.ModelSerializer):
     dish_id = serializers.IntegerField(source='dish.id', read_only=True)
     dish_name = serializers.CharField(source='dish.name', read_only=True)
+    dish_image = serializers.SerializerMethodField()
     addons = CartItemAddonReadSerializer(many=True, read_only=True)
     ingredients = CartItemIngredientReadSerializer(many=True, read_only=True)
     removed_ingredients = CartItemRemovedIngredientSerializer(many=True, read_only=True)
@@ -127,9 +128,15 @@ class CartItemReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = [
-            'id', 'dish_id', 'dish_name', 'quantity', 'price_per_unit', 
+            'id', 'dish_id', 'dish_name', 'dish_image', 'quantity', 'price_per_unit',
             'total_price', 'addons', 'ingredients', 'removed_ingredients'
         ]
+
+    def get_dish_image(self, obj):
+        img = obj.dish.images.first()
+        if img:
+            return '/media/' + str(img.image)
+        return None
 
     def get_price_per_unit(self, obj):
         dish = obj.dish
