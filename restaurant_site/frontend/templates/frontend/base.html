@@ -38,6 +38,7 @@
       <nav id="navmenu" class="navmenu">
         <ul>
           <li><a href="{% url 'index' %}" {% block nav_home %}{% endblock %}>Головна</a></li>
+          <li><a href="/#about">Про нас</a></li>
           <li><a href="{% url 'menu' %}" {% block nav_menu %}{% endblock %}>Меню</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -62,7 +63,6 @@
   </div>
 </header>
 
-<!-- Overlay -->
 <div id="cart-overlay" onclick="handleOverlayClick()"></div>
 
 <!-- Панель кошика -->
