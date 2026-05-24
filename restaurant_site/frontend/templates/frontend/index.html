@@ -23,6 +23,68 @@
   </div>
 </section>
 
+<!-- Про нас -->
+<section id="about" class="about section">
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="row gy-4">
+
+      <div class="col-lg-6 order-1 order-lg-2">
+        <div class="swiper init-swiper" style="border-radius:8px; overflow:hidden;">
+          <script type="application/json" class="swiper-config">
+            {
+              "loop": true,
+              "speed": 600,
+              "autoplay": { "delay": 3000 },
+              "slidesPerView": 1,
+              "pagination": {
+                "el": ".about-swiper-pagination",
+                "type": "bullets",
+                "clickable": true
+              }
+            }
+          </script>
+          <div class="swiper-wrapper">
+            {% for i in "12345678" %}
+            <div class="swiper-slide">
+              <img src="{% static 'frontend/img/gallery/gallery-'%}{{ i }}.jpg"
+                   style="width:100%; height:420px; object-fit:cover;" alt="Фото ресторану">
+            </div>
+            {% endfor %}
+          </div>
+          <div class="about-swiper-pagination swiper-pagination" style="margin-top:10px; position:relative;"></div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 order-2 order-lg-1 content">
+        <h3>Ресторан з душею та смаком</h3>
+        <p class="fst-italic">
+          Ми раді вітати вас у нашому ресторані, де кожна страва — це результат праці та любові наших кухарів.
+        </p>
+        <ul>
+          <li>
+            <i class="bi bi-check2-all"></i>
+            <span>Використовуємо лише свіжі та якісні інгредієнти від перевірених постачальників.</span>
+          </li>
+          <li>
+            <i class="bi bi-check2-all"></i>
+            <span>Наше меню поєднує традиційну українську кухню з сучасними гастрономічними трендами.</span>
+          </li>
+          <li>
+            <i class="bi bi-check2-all"></i>
+            <span>Затишна атмосфера та уважний персонал зроблять ваш відпочинок незабутнім.</span>
+          </li>
+        </ul>
+        <p>
+          Завітайте до нас і відчуйте різницю між звичайною їжею і справжнім задоволенням від кожного укусу. Ми чекаємо на вас щодня!
+        </p>
+        <a href="{% url 'menu' %}" class="cta-btn" style="margin-top:16px; display:inline-block;">
+          Переглянути меню
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Популярні страви -->
 <section id="specials" class="specials section">
   <div class="container section-title" data-aos="fade-up">
