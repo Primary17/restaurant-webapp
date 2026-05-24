@@ -24,6 +24,7 @@ def create_order(user, data):
         items_total=Decimal("0.00"),
         total_price=Decimal("0.00"),
         address=data.get("address", ""),
+        phone=data.get("phone", ""),
         comment=data.get("comment", ""),
     )
 

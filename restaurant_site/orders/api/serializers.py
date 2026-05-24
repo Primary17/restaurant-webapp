@@ -53,7 +53,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id', 'status', 'items_total', 'delivery_fee', 'total_price',
-            'address', 'comment', 'items', 'created_at'
+            'address', 'phone', 'comment', 'items', 'created_at'
         ]
 
 
@@ -65,6 +65,7 @@ class CreateOrderSerializer(serializers.Serializer):
 
 class CheckoutSerializer(serializers.Serializer):
     address = serializers.CharField()
+    phone = serializers.CharField(required=False, allow_blank=True)
     comment = serializers.CharField(required=False, allow_blank=True)
 
 

@@ -26,6 +26,7 @@ def checkout_cart(user, data):
     order_data = {
         "items": items_data,
         "address": data.get("address"),
+        "phone": data.get("phone", ""),
         "comment": data.get("comment", "")
     }
 

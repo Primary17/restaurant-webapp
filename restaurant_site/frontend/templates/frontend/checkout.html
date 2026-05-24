@@ -55,6 +55,15 @@
                    placeholder="вул. Хрещатик, 1, кв. 5">
           </div>
 
+          <div style="margin-bottom:16px;">
+              <label style="color:var(--accent-color); font-size:0.8rem; text-transform:uppercase;
+                            letter-spacing:0.05em; display:block; margin-bottom:6px;">
+                Номер телефону
+              </label>
+              <input type="tel" id="checkout-phone" class="auth-input"
+                     placeholder="+38 097 777 77 77">
+          </div>
+
           <div style="margin-bottom:24px;">
             <label style="color:var(--accent-color); font-size:0.8rem; text-transform:uppercase;
                           letter-spacing:0.05em; display:block; margin-bottom:6px;">
@@ -192,6 +201,7 @@ function submitCheckout() {
 
   const isDelivery = document.getElementById('type-delivery').checked;
   const address = document.getElementById('checkout-address').value.trim();
+  const phone = document.getElementById('checkout-phone').value.trim();
   const comment = document.getElementById('checkout-comment').value.trim();
 
   if (isDelivery && !address) {
@@ -201,6 +211,7 @@ function submitCheckout() {
 
   const payload = {
     address: isDelivery ? address : 'Самовивіз',
+    phone: phone,
     comment: comment,
   };
 
