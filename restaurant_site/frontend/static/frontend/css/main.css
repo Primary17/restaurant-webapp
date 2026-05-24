@@ -1188,6 +1188,7 @@ section,
   display: flex;
   justify-content: space-between;
   position: relative;
+  align-items: flex-start;
 }
 
 .menu .menu-content::after {
@@ -1209,6 +1210,10 @@ section,
   z-index: 3;
   font-weight: 700;
   transition: 0.3s;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menu .menu-content a:hover {
