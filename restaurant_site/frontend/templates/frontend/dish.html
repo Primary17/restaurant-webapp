@@ -37,7 +37,7 @@
           {% for group in dish.ingredient_groups.all %}
           <div class="mb-3">
             <h6 style="color:#cda45e;">{{ group.name }}</h6>
-            <div class="d-flex flex-wrap gap-2 ingredient-group">
+            <div class="d-flex flex-wrap gap-2 ingredient-group" data-max-choices="{{ group.max_choices }}">
                 {% for option in group.options.all %}
               <div class="ingredient-card p-2 rounded text-center"
                  data-id="{{ option.id }}"
@@ -150,14 +150,32 @@ function updatePrice() {
 
 function toggleIngredient(el) {
   const group = el.closest('.ingredient-group');
-  group.querySelectorAll('.ingredient-card').forEach(card => {
-    card.dataset.selected = 'false';
-    card.style.border = '1px solid #333';
-    card.style.background = '#1a1a1a';
-  });
-  el.dataset.selected = 'true';
-  el.style.border = '1px solid #cda45e';
-  el.style.background = '#2a2a1a';
+  const maxChoices = parseInt(group.dataset.maxChoices) || 1;
+
+  if (maxChoices === 1) {
+    group.querySelectorAll('.ingredient-card').forEach(card => {
+      card.dataset.selected = 'false';
+      card.style.border = '1px solid #333';
+      card.style.background = '#1a1a1a';
+    });
+    el.dataset.selected = 'true';
+    el.style.border = '1px solid #cda45e';
+    el.style.background = '#2a2a1a';
+  } else {
+    const isSelected = el.dataset.selected === 'true';
+    if (isSelected) {
+      el.dataset.selected = 'false';
+      el.style.border = '1px solid #333';
+      el.style.background = '#1a1a1a';
+    } else {
+      const selectedCount = group.querySelectorAll('.ingredient-card[data-selected="true"]').length;
+      if (selectedCount < maxChoices) {
+        el.dataset.selected = 'true';
+        el.style.border = '1px solid #cda45e';
+        el.style.background = '#2a2a1a';
+      }
+    }
+  }
   updatePrice();
 }
 
