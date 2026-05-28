@@ -220,6 +220,46 @@ docker compose exec web python manage.py test
 
 On push and pull requests, **GitHub Actions** builds the app image and runs migrations plus tests inside Docker (`docker-compose.ci.yml`).
 
+## Deploying to Heroku (GitHub Actions)
+
+The app uses the **Heroku container stack** (`Dockerfile` + `heroku.yml`). After each push to `main`/`master`, CI runs tests in Docker, then builds and releases the image to Heroku.
+
+### 1. Create the Heroku app
+
+```bash
+heroku login
+heroku apps:create your-app-name
+heroku stack:set container -a your-app-name
+heroku addons:create heroku-postgresql:essential-0 -a your-app-name
+```
+
+### 2. Config vars on Heroku
+
+```bash
+heroku config:set DEBUG=0 -a your-app-name
+heroku config:set DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(50))')" -a your-app-name
+heroku config:set ALLOWED_HOSTS=your-app-name.herokuapp.com -a your-app-name
+heroku config:set CORS_ALLOWED_ORIGINS=https://your-app-name.herokuapp.com -a your-app-name
+heroku config:set CSRF_TRUSTED_ORIGINS=https://your-app-name.herokuapp.com -a your-app-name
+```
+
+`DATABASE_URL` is set automatically when Postgres is attached.
+
+### 3. GitHub repository secrets
+
+In **Settings → Secrets and variables → Actions**, add:
+
+| Secret | Description |
+|--------|-------------|
+| `HEROKU_API_KEY` | [Account API key](https://dashboard.heroku.com/account) |
+| `HEROKU_APP_NAME` | App name (e.g. `your-app-name`) |
+
+### 4. Deploy
+
+Push to `main` (or `master`). The workflow `.github/workflows/django-ci.yml` will test, push the Docker image, and run `heroku container:release`. Migrations run via the `release` phase in `heroku.yml`.
+
+Uploaded media on Heroku are ephemeral; use S3 or similar for persistent files in production.
+
 ## Contributing
 1. Create a new branch: `git checkout -b feature/your-feature-name`.
 2. Commit your changes: `git commit -m 'Add some feature'`.

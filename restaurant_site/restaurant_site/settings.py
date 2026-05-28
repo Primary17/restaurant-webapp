@@ -44,7 +44,10 @@ else:
     if origins:
         CORS_ALLOWED_ORIGINS = [o.strip() for o in origins.split(',') if o.strip()]
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost 127.0.0.1 0.0.0.0').split()
+_allowed_hosts = os.getenv('ALLOWED_HOSTS', 'localhost 127.0.0.1 0.0.0.0').split()
+if os.getenv('DYNO'):
+    _allowed_hosts.append('.herokuapp.com')
+ALLOWED_HOSTS = list(dict.fromkeys(h for h in _allowed_hosts if h))
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -135,16 +138,28 @@ SIMPLE_JWT = {
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+import dj_database_url
+
+_database_url = os.getenv('DATABASE_URL')
+if _database_url:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=_database_url,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        ),
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': os.getenv('POSTGRES_HOST', 'db'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        }
+    }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -188,3 +203,16 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', '1').lower() in (
+        '1', 'true', 'yes', 'on',
+    )
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    _csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '').strip()
+    if _csrf_origins:
+        CSRF_TRUSTED_ORIGINS = [
+            o.strip() for o in _csrf_origins.split(',') if o.strip()
+        ]
