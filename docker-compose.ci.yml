@@ -1,0 +1,32 @@
+# CI-only stack: Postgres + one-off test runner (same image as production web).
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: restaurant
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d restaurant"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  test:
+    build:
+      context: .
+      dockerfile: dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DJANGO_SETTINGS_MODULE: restaurant_site.settings_test
+      DJANGO_SECRET_KEY: ci-test-secret-key
+      POSTGRES_DB: restaurant
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py test users orders menu.tests --verbosity=2"

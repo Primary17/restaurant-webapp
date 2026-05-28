@@ -7,45 +7,17 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: restaurant
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t restaurant-app .
-
-      - name: Run container
+      - name: Run migrations and tests in Docker Compose
         run: |
-          docker run -d \
-            --name test_app \
-            -e POSTGRES_HOST=host.docker.internal \
-            -e POSTGRES_DB=restaurant \
-            -e POSTGRES_USER=user \
-            -e POSTGRES_PASSWORD=password \
-            -p 8000:8000 \
-            restaurant-app
+          docker compose -f docker-compose.ci.yml up --build --abort-on-container-exit --exit-code-from test
 
-      - name: Wait for app
-        run: sleep 10
-
-      - name: Run tests (placeholder)
-        run: |
-          docker exec test_app python manage.py test || echo "No tests yet"
+      - name: Tear down CI stack
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v

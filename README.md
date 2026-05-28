@@ -209,6 +209,17 @@ All dish images are stored in the `/media/dishes/` directory.
 
 If images are not appearing after running `loaddata`, ensure the `media/` folder is present in the repository or volume mount.
 
+## Running tests
+
+Tests use PostgreSQL (same as the app). With Docker Compose DB running on port `5433`:
+
+```bash
+docker compose up -d
+docker compose exec web python manage.py test
+```
+
+On push and pull requests, **GitHub Actions** builds the app image and runs migrations plus tests inside Docker (`docker-compose.ci.yml`).
+
 ## Contributing
 1. Create a new branch: `git checkout -b feature/your-feature-name`.
 2. Commit your changes: `git commit -m 'Add some feature'`.
