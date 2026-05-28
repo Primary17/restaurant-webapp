@@ -141,3 +141,7 @@ def dish_detail(request, dish_id):
 
 def checkout(request):
     return render(request, 'frontend/checkout.html')
+
+
+def staff_orders(request):
+    return render(request, 'frontend/staff_orders.html')

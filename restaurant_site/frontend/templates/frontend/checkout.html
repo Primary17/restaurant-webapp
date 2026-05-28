@@ -215,6 +215,10 @@ function submitCheckout() {
     comment: comment,
   };
 
+  const submitButton = document.querySelector('.cart-checkout-btn');
+  submitButton.disabled = true;
+  submitButton.textContent = 'Оформлюємо...';
+
   fetch('/api/orders/cart/checkout/', {
     method: 'POST',
     headers: {
@@ -223,14 +227,48 @@ function submitCheckout() {
     },
     body: JSON.stringify(payload)
   })
-  .then(r => r.json())
+  .then(async r => {
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      throw new Error(extractCheckoutError(data));
+    }
+    return data;
+  })
   .then(data => {
     if (data.id) {
       showOrderSuccess(data.id);
     } else {
       showCheckoutError(data.detail || 'Помилка при оформленні замовлення');
     }
+  })
+  .catch(err => {
+    showCheckoutError(err.message || 'Помилка при оформленні замовлення');
+  })
+  .finally(() => {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Підтвердити замовлення';
   });
+}
+
+function extractCheckoutError(data) {
+  if (!data || typeof data !== 'object') {
+    return 'Помилка при оформленні замовлення';
+  }
+  if (data.detail) {
+    return data.detail;
+  }
+  const firstKey = Object.keys(data)[0];
+  if (!firstKey) {
+    return 'Помилка при оформленні замовлення';
+  }
+  const value = data[firstKey];
+  if (Array.isArray(value)) {
+    return value[0] || 'Помилка при оформленні замовлення';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  return 'Помилка при оформленні замовлення';
 }
 
 function showCheckoutError(msg) {

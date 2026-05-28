@@ -40,6 +40,7 @@
           <li><a href="{% url 'index' %}" {% block nav_home %}{% endblock %}>Головна</a></li>
           <li><a href="/#about">Про нас</a></li>
           <li><a href="{% url 'menu' %}" {% block nav_menu %}{% endblock %}>Меню</a></li>
+          <li id="staff-nav-item" style="display:none;"><a href="{% url 'staff_orders' %}">Панель персоналу</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -218,6 +219,7 @@ function doLogin() {
       localStorage.setItem('access', data.access);
       localStorage.setItem('refresh', data.refresh);
       localStorage.setItem('username', data.user.username);
+      localStorage.setItem('role', data.user.role);
       updateAuthUI();
       closeAuthModal();
       loadCart();
@@ -260,6 +262,7 @@ function doRegister() {
       localStorage.setItem('access', data.access);
       localStorage.setItem('refresh', data.refresh);
       localStorage.setItem('username', data.user.username);
+      localStorage.setItem('role', data.user.role);
       updateAuthUI();
       closeAuthModal();
       loadCart();
@@ -273,6 +276,7 @@ function logout() {
   localStorage.removeItem('access');
   localStorage.removeItem('refresh');
   localStorage.removeItem('username');
+  localStorage.removeItem('role');
   updateAuthUI();
   document.getElementById('cart-items-container').innerHTML = '<div class="cart-empty">Кошик порожній</div>';
   document.getElementById('cart-footer').style.display = 'none';
@@ -280,13 +284,21 @@ function logout() {
 }
 function updateAuthUI() {
   const username = localStorage.getItem('username');
+  const role = localStorage.getItem('role');
+  const staffNav = document.getElementById('staff-nav-item');
   if (username) {
     document.getElementById('btn-login').style.display = 'none';
     document.getElementById('btn-user').style.display = 'flex';
     document.getElementById('user-name').textContent = username;
+    if (staffNav) {
+      staffNav.style.display = (role === 'staff' || role === 'admin') ? 'list-item' : 'none';
+    }
   } else {
     document.getElementById('btn-login').style.display = 'block';
     document.getElementById('btn-user').style.display = 'none';
+    if (staffNav) {
+      staffNav.style.display = 'none';
+    }
   }
 }
 

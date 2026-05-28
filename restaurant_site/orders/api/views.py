@@ -47,6 +47,27 @@ class MyOrdersView(APIView):
         return Response(OrderSerializer(orders, many=True).data)
 
 
+class StaffOrdersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role not in ['staff', 'admin']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        status_filter = request.query_params.get('status')
+        orders = Order.objects.all()
+        if status_filter:
+            orders = orders.filter(status=status_filter)
+
+        orders = orders.select_related('user').prefetch_related(
+            'items__addons',
+            'items__ingredients',
+            'items__removed_ingredients',
+        ).order_by('-created_at')
+
+        return Response(OrderSerializer(orders, many=True).data)
+
+
 class OrderDetailView(APIView):
     permission_classes = [IsAuthenticated]
 

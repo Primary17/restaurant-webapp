@@ -30,7 +30,9 @@ def checkout_cart(user, data):
         "comment": data.get("comment", "")
     }
 
-    order = create_order(user, order_data)
+    # Під час checkout не перевалідовуємо рядки повторно:
+    # вони вже валідовані на етапі додавання в кошик.
+    order = create_order(user, order_data, validate_line=False)
 
     cart.items.all().delete()
 

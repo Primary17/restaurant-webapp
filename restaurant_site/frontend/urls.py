@@ -7,4 +7,5 @@ urlpatterns = [
     path('menu/<int:dish_id>/', views.dish_detail, name='dish_detail'),
     path('menu/ajax/', views.menu_ajax, name='menu_ajax'),
     path('checkout/', views.checkout, name='checkout'),
+    path('staff/orders/', views.staff_orders, name='staff_orders'),
 ]

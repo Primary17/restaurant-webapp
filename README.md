@@ -165,6 +165,16 @@ To access the Django Admin panel (http://localhost:8000/admin), create an admin 
 sudo docker exec -it restaurant_web python manage.py createsuperuser
 ```
 
+### Staff accounts (kitchen / orders panel)
+Set **Role** (`Staff` or `Admin`) in Django Admin → **Users**. That grants:
+
+- the site staff panel (`/staff/orders/`) and orders API;
+- **Staff status** for Django Admin — set automatically when you save (no need to toggle it manually).
+
+**Customer** — only the public site (menu, cart, checkout). Superusers keep full access regardless of role.
+
+After pulling these changes, run `migrate` once so existing users get the correct `is_staff` flag.
+
 ### Populate database with sample data
 To see the menu with pre-configured dishes (Fine Dining, Drinks, etc.) and their images:
 ```bash

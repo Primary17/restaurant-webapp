@@ -1,0 +1,180 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Замовлення персоналу{% endblock %}
+
+{% block content %}
+<div class="page-title dark-background" style="background-image: url({% static 'frontend/img/page-title-bg.webp' %}); min-height:200px;"></div>
+
+<section class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Панель персоналу</h2>
+      <p>Замовлення клієнтів</p>
+    </div>
+
+    <div style="background:var(--surface-color); border-radius:8px; padding:20px; margin-bottom:16px;">
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <label for="status-filter" style="color:var(--accent-color); font-size:0.9rem; margin:0;">Фільтр статусу:</label>
+        <select id="status-filter" class="auth-input" style="max-width:240px;">
+          <option value="">Усі</option>
+          <option value="pending">Нові</option>
+          <option value="confirmed">Підтверджені</option>
+          <option value="preparing">Готуються</option>
+          <option value="ready">Готові</option>
+          <option value="delivering">Доставляються</option>
+          <option value="completed">Завершені</option>
+          <option value="cancelled">Скасовані</option>
+        </select>
+        <button class="cart-checkout-btn" style="width:auto; padding:10px 18px;" onclick="loadStaffOrders()">Оновити</button>
+      </div>
+    </div>
+
+    <div id="staff-orders-error" style="display:none; background:#df1529; color:#fff; padding:10px 15px; font-size:0.85rem; font-weight:600; margin-bottom:16px;"></div>
+    <div id="staff-orders-container"></div>
+  </div>
+</section>
+
+<script>
+const STAFF_STATUS_LABELS = {
+  pending: 'Нове',
+  confirmed: 'Підтверджено',
+  preparing: 'Готується',
+  ready: 'Готово',
+  delivering: 'Доставляється',
+  completed: 'Завершено',
+  cancelled: 'Скасовано'
+};
+
+let staffOrdersTimer = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  const token = localStorage.getItem('access');
+  const role = localStorage.getItem('role');
+  if (!token || (role !== 'staff' && role !== 'admin')) {
+    window.location.href = '/menu/';
+    return;
+  }
+
+  document.getElementById('status-filter').addEventListener('change', loadStaffOrders);
+  loadStaffOrders();
+  staffOrdersTimer = setInterval(loadStaffOrders, 15000);
+});
+
+window.addEventListener('beforeunload', function() {
+  if (staffOrdersTimer) {
+    clearInterval(staffOrdersTimer);
+  }
+});
+
+function loadStaffOrders() {
+  const token = localStorage.getItem('access');
+  const statusFilter = document.getElementById('status-filter').value;
+  const params = new URLSearchParams();
+  if (statusFilter) {
+    params.append('status', statusFilter);
+  }
+
+  fetch('/api/orders/staff/' + (params.toString() ? '?' + params.toString() : ''), {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(async r => {
+    if (!r.ok) {
+      throw new Error('Не вдалося отримати замовлення');
+    }
+    return r.json();
+  })
+  .then(data => {
+    hideStaffOrdersError();
+    renderStaffOrders(data || []);
+  })
+  .catch(() => showStaffOrdersError('Помилка завантаження замовлень'));
+}
+
+function renderStaffOrders(orders) {
+  const container = document.getElementById('staff-orders-container');
+  if (!orders.length) {
+    container.innerHTML = '<div style="background:var(--surface-color); border-radius:8px; padding:24px; color:var(--default-color); text-align:center;">Немає замовлень за вибраним фільтром</div>';
+    return;
+  }
+
+  let html = '';
+  orders.forEach(order => {
+    const created = new Date(order.created_at);
+    const itemsHtml = (order.items || []).map(item => {
+      const addons = (item.addons || []).map(addon => `+ ${addon.name}`).join(', ');
+      const removed = (item.removed_ingredients || []).map(ing => `- ${ing.name}`).join(', ');
+      return `
+        <div style="padding:8px 0; border-bottom:1px solid color-mix(in srgb, var(--default-color), transparent 90%);">
+          <div style="display:flex; justify-content:space-between; gap:12px;">
+            <div style="color:var(--heading-color); font-weight:600;">${item.name} x ${item.quantity}</div>
+            <div style="color:var(--accent-color); white-space:nowrap;">${parseFloat(item.total_price || 0).toFixed(2)} грн</div>
+          </div>
+          ${addons ? `<div style="color:var(--default-color); font-size:0.85rem;">${addons}</div>` : ''}
+          ${removed ? `<div style="color:var(--default-color); font-size:0.85rem;">${removed}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    html += `
+      <div style="background:var(--surface-color); border-radius:8px; padding:18px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; margin-bottom:10px;">
+          <div>
+            <div style="color:var(--heading-color); font-family:var(--heading-font); font-size:1.05rem;">Замовлення #${order.id}</div>
+            <div style="color:var(--default-color); font-size:0.88rem;">${created.toLocaleString('uk-UA')}</div>
+            <div style="color:var(--default-color); font-size:0.88rem;">Адреса: ${order.address || '—'}</div>
+            <div style="color:var(--default-color); font-size:0.88rem;">Телефон: ${order.phone || '—'}</div>
+            ${order.comment ? `<div style="color:var(--default-color); font-size:0.88rem;">Коментар: ${order.comment}</div>` : ''}
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; min-width:200px;">
+            <select class="auth-input" id="status-select-${order.id}">
+              ${Object.keys(STAFF_STATUS_LABELS).map(status => `<option value="${status}" ${order.status === status ? 'selected' : ''}>${STAFF_STATUS_LABELS[status]}</option>`).join('')}
+            </select>
+            <button class="cart-checkout-btn" style="width:100%; padding:9px 12px;" onclick="updateOrderStatus(${order.id})">Оновити статус</button>
+          </div>
+        </div>
+        <div style="margin:8px 0 10px;">${itemsHtml}</div>
+        <div style="display:flex; justify-content:flex-end;">
+          <span style="color:var(--heading-color); font-weight:700;">Разом: ${parseFloat(order.total_price || 0).toFixed(2)} грн</span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function updateOrderStatus(orderId) {
+  const token = localStorage.getItem('access');
+  const status = document.getElementById('status-select-' + orderId).value;
+
+  fetch(`/api/orders/${orderId}/status/`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({ status })
+  })
+  .then(async r => {
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      throw new Error(data.detail || 'Не вдалося оновити статус');
+    }
+    return data;
+  })
+  .then(() => loadStaffOrders())
+  .catch(err => showStaffOrdersError(err.message || 'Не вдалося оновити статус'));
+}
+
+function showStaffOrdersError(message) {
+  const el = document.getElementById('staff-orders-error');
+  el.textContent = message;
+  el.style.display = 'block';
+}
+
+function hideStaffOrdersError() {
+  document.getElementById('staff-orders-error').style.display = 'none';
+}
+</script>
+{% endblock %}

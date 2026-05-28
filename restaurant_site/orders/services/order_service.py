@@ -14,7 +14,7 @@ from orders.models import (
 from orders.services.validation_service import validate_order_line
 
 @transaction.atomic
-def create_order(user, data):
+def create_order(user, data, validate_line=True):
     items_data = data["items"]
     if not items_data:
         raise ValidationError({"items": "Потрібен хоча б один товар у замовленні."})
@@ -48,10 +48,11 @@ def create_order(user, data):
         removed_ing_ids = item_data.get("removed_ingredients") or []
         added_ing_ids = item_data.get("added_ingredients") or []
 
-        try:
-            validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids, added_ing_ids)
-        except ValueError as exc:
-            raise ValidationError({"items": str(exc)}) from exc
+        if validate_line:
+            try:
+                validate_order_line(dish, addon_ids, ing_ids, removed_ing_ids, added_ing_ids)
+            except ValueError as exc:
+                raise ValidationError({"items": str(exc)}) from exc
 
         item = OrderItem.objects.create(
             order=order,
