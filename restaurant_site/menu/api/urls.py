@@ -1,6 +1,7 @@
 from django.urls import path
 from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import re_path
+from django.views.static import serve
 
 from .views import CategoryTreeView, DishDetailView, DishListView
 
@@ -10,7 +11,9 @@ urlpatterns = [
     path('dishes/<int:pk>/', DishDetailView.as_view(), name='menu-dish-detail'),
 ]
 
-urlpatterns += static(
-    settings.MEDIA_URL,
-    document_root=settings.MEDIA_ROOT
-)
+# FOR DEMO ONLY (works on Heroku dyno)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {
+        'document_root': settings.MEDIA_ROOT,
+    }),
+]
