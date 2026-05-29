@@ -10,8 +10,7 @@ urlpatterns = [
     path('dishes/<int:pk>/', DishDetailView.as_view(), name='menu-dish-detail'),
 ]
 
-if settings.MEDIA_URL:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT,
-    )
+urlpatterns += static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT
+)
